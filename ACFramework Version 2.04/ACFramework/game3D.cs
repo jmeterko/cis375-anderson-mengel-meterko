@@ -323,41 +323,56 @@ namespace ACFramework
     }
 
     class cCritterTreasure : cCritter
-    {   // Try jumping through this hoop
+    {
+
+        Random randPos = new Random();
 
         public cCritterTreasure(cGame pownergame) :
         base(pownergame)
         {
-            /* The sprites look nice from afar, but bitmap speed is really slow
-		when you get close to them, so don't use this. */
-            cPolygon ppoly = new cPolygon(24);
-            ppoly.Filled = false;
-            ppoly.LineWidthWeight = 0.5f;
+            //set a polygon to a red diamond shape
+            cPolygon ppoly = new cPolygon();
+            ppoly.Filled = true;
+            ppoly.LineWidthWeight = 1.0f;
+            ppoly.setStarPolygon(2,1);
+            ppoly.FillColor = Color.Red;
+
+            //set the treasure to the created shape
             Sprite = ppoly;
-            _collidepriority = cCollider.CP_PLAYER + 1; /* Let this guy call collide on the
-			player, as his method is overloaded in a special way. */
-            rotate(new cSpin((float)Math.PI / 2.0f, new cVector3(0.0f, 0.0f, 1.0f))); /* Trial and error shows this
-			rotation works to make it face the z diretion. */
+
+            //set size and fix it in place so enemies don't push it around
             setRadius(cGame3D.TREASURERADIUS);
             FixedFlag = true;
-            moveTo(new cVector3(_movebox.Midx, _movebox.Midy - 2.0f,
-                _movebox.Loz - 1.5f * cGame3D.TREASURERADIUS));
+            
+
+            //make a random number to place treasure in room
+            moveTo(new cVector3(randPos.Next(-32,32), -15, randPos.Next(-32, 32)));
         }
 
 
         public override bool collide(cCritter pcritter)
         {
-            if (contains(pcritter)) //disk of pcritter is wholly inside my disk 
+            if (distanceTo(pcritter) + pcritter.Radius < Radius + 1) //if player gets within radius+1 of pickup (close but not inside of it)
             {
-                Framework.snd.play(Sound.Clap);
-                pcritter.addScore(100);
-                pcritter.addHealth(1);
-                pcritter.moveTo(new cVector3(_movebox.Midx, _movebox.Loy + 1.0f,
-                    _movebox.Hiz - 3.0f));
+                //play sound for pickup, add score, add health, and make the treasure go away.
+                Framework.snd.play(Sound.Hallelujah);
+                pcritter.addScore(50);
+                pcritter.addHealth(5);
+                _collecteditem = true;  //set flag to determine when to spawn new item
+                pcritter.setSpin(new cVector3(10.0f, 10.0f, 10.0f));
+
+                //this makes the pickup respawn in a new random location on pickup
+                //moveTo(new cVector3(randPos.Next(-32, 32), -15, randPos.Next(-32, 32)));
+
+                //this removes the pickup from the current room, so it doesn't respawn
+                delete_me();            //delete the pickup, now that it has been used
                 return true;
             }
             else
+            {
                 return false;
+            }
+            //return false;
         }
 
         //Checks if pcritter inside.
@@ -390,7 +405,7 @@ namespace ACFramework
     //======================cGame3D========================== 
     class cGame3D : cGame
     {
-        public static readonly float TREASURERADIUS = 1.2f;
+        public static readonly float TREASURERADIUS = 1.0f;
         public static readonly float WALLTHICKNESS = 0.5f;
         public static readonly float PLAYERRADIUS = 0.5f; //sets the player size
         public static readonly float MAXPLAYERSPEED = 10.0f; //sets the player speed
@@ -443,6 +458,7 @@ namespace ACFramework
             //remove critters and wall
             Biota.purgeCritters("cCritterWall");
             Biota.purgeCritters("cCritter3Dcharacter");
+            Biota.purgeCritters("cCritterTreasure");
 
             setBorder(64.0f, 16.0f, 64.0f); // size of the world
 
@@ -539,6 +555,7 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {

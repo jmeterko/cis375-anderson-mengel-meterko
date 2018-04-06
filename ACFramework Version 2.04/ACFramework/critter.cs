@@ -60,6 +60,7 @@ namespace ACFramework
         protected bool _shieldflag; //Immunity to being damage() calls.
         protected uint _personality; /* Random bits to sometimes use for making critters have different
 			behaviors, as when using evasion forces. */
+        protected bool _collecteditem;//variable to determine if treasure should be removed
         protected float _mutationstrength; /* Number between 0.0 and 1.0 controlling how different
 			a spawned copy will be. */
         protected cCritter _ptarget; /* In case you are following or dragging or watching or aimed at
@@ -228,6 +229,7 @@ namespace ACFramework
             _bounciness = 1.0f;
             _mutationstrength = MUTATIONSTRENGTH; //Default 0.6 (out of 1.0 max) 
             _ptarget = null;
+            _collecteditem = false;
 //            _metrickey = -1; //Put in a bad index by default 
             _psprite = new cSprite(); /* Let's always have a valid sprite.  The default cSprite looks
 			    like a circle, by the way. */
