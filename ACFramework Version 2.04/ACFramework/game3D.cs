@@ -228,10 +228,10 @@ namespace ACFramework
         }
     }
 
-    class cCritter3Dcharacter : cCritter
+    class cCritterZombie : cCritter
     {
 
-        public cCritter3Dcharacter(cGame pownergame)
+        public cCritterZombie(cGame pownergame)
             : base(pownergame)
         {
             addForce(new cForceGravity(25.0f, new cVector3(0.0f, -1, 0.00f)));
@@ -300,26 +300,15 @@ namespace ACFramework
 
         public override bool IsKindOf(string str)
         {
-            return str == "cCritter3Dcharacter" || base.IsKindOf(str);
+            return str == "cCritterZombie" || base.IsKindOf(str);
         }
 
         public override string RuntimeClass
         {
             get
             {
-                return "cCritter3Dcharacter";
+                return "cCritterZombie";
             }
-        }
-    }
-
-    class cCritterZombie : cCritter3Dcharacter
-    {        
-
-        public cCritterZombie(cGame pownergame)
-            : base(pownergame)
-        {
-            setHealth(4);
-  
         }
     }
 
@@ -360,7 +349,6 @@ namespace ACFramework
                 pcritter.addScore(50);
                 pcritter.addHealth(5);
                 _collecteditem = true;  //set flag to determine when to spawn new item
-                pcritter.setSpin(new cVector3(10.0f, 10.0f, 10.0f));
 
                 //this makes the pickup respawn in a new random location on pickup
                 //moveTo(new cVector3(randPos.Next(-32, 32), -15, randPos.Next(-32, 32)));
@@ -458,7 +446,7 @@ namespace ACFramework
         {
             //remove critters and wall
             Biota.purgeCritters("cCritterWall");
-            Biota.purgeCritters("cCritter3Dcharacter");
+            Biota.purgeCritters("cCritterZombie");
             Biota.purgeCritters("cCritterTreasure");
 
             setBorder(64.0f, 16.0f, 64.0f); // size of the world
@@ -503,9 +491,9 @@ namespace ACFramework
         public override void seedCritters()
         {
             Biota.purgeCritters("cCritterBullet");
-            Biota.purgeCritters("cCritter3Dcharacter");
+            Biota.purgeCritters("cCritterZombie");
             for (int i = 0; i < _seedcount; i++)
-                new cCritter3Dcharacter(this);
+                new cCritterZombie(this);
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
             /* We start at hiz and move towards	loz */
         }
@@ -567,10 +555,10 @@ namespace ACFramework
             }
             // (2) Also don't let the the model count diminish.
             //(need to recheck propcount in case we just called seedCritters).
-            int modelcount = Biota.count("cCritter3Dcharacter");
+            int modelcount = Biota.count("cCritterZombie");
             int modelstoadd = _seedcount - modelcount;
             for (int i = 0; i < modelstoadd; i++)
-                new cCritter3Dcharacter(this);
+                new cCritterZombie(this);
             // (3) Maybe check some other conditions.
 
             if (wentThrough && (Age - startNewRoom) > 2.0f)
