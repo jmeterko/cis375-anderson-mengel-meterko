@@ -106,7 +106,7 @@ namespace ACFramework
 
             else
             {
-                damage(1);
+                damage(pcritter.getHitDamage());
                 Framework.snd.play(Sound.Crunch);
             }
             pcritter.die();
@@ -230,7 +230,6 @@ namespace ACFramework
 
     class cCritterZombie : cCritter
     {
-
         public cCritterZombie(cGame pownergame)
             : base(pownergame)
         {
@@ -311,6 +310,66 @@ namespace ACFramework
             }
         }
     }
+
+    class zombieWalker : cCritterZombie
+    {
+        public zombieWalker(cGame pownergame)
+            : base(pownergame)
+        {
+                setIsRunner(false);
+                setHitDamage(2);
+                setHealth(2);
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
+        }
+    }
+
+    class zombieTank : cCritterZombie
+    {
+        public zombieTank(cGame pownergame)
+            : base(pownergame)
+        {
+            setIsRunner(false);
+            setHitDamage(4);
+            setHealth(4);
+            _maxspeed = 1.5f;
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
+        }
+    }
+
+    class zombieRunner : cCritterZombie
+    {
+        public zombieRunner(cGame pownergame)
+            : base(pownergame)
+        {
+            setIsRunner(true);
+            setHitDamage(1);
+            setHealth(1);
+            _maxspeed = 5;
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
+        }
+    }
+
 
     class cCritterTreasure : cCritter
     {
@@ -468,7 +527,6 @@ namespace ACFramework
             _seedcount = 7;
 
             WrapFlag = cCritter.BOUNCE;
-            setPlayer(new cCritter3DPlayer(this));
             _ptreasure = new cCritterTreasure(this);
 
             //create a door at a new position in the room
@@ -490,11 +548,50 @@ namespace ACFramework
 
         public override void seedCritters()
         {
+            int zombieType = 0; //value used to determine which zombie will be spawned
+            int walkers = 0;
+            int runners = 0;
+            int tanks = 0;
+            Random rand = new Random();//to be used to determine type of zombie to spawn
+
+
             Biota.purgeCritters("cCritterBullet");
             Biota.purgeCritters("cCritterZombie");
             for (int i = 0; i < _seedcount; i++)
-                new cCritterZombie(this);
+            {
+
+                /* Logic to Zombie Type Spawns :
+                 * The zombieType will be stored as an int, it is a # generated randomly between 1 and 10
+                 * The below conditionals will check what the number is, then set the zombies' health, speed, and damage hit strength
+                 * The numbers 1-10 determine these zombie stats. 
+                 * The 'walker' or regular zombie will be 1-5, making it more common
+                 * The 'tank' or heavy zombie will be 6 or 7, making it least common
+                 * The 'runner' or fast zombie will be 8-10, making it a medium 'rarity'
+                 */
+
+                zombieType = rand.Next(1, 11);//generate the zombie type seed
+
+                if (zombieType < 6)//if the seed was 1-5
+                {
+                    new zombieWalker(this);
+                    walkers++;
+                }
+
+                else if (zombieType < 8) //if the seed was 6 or 7
+                {
+                    new zombieTank(this);
+                    tanks++;
+                }
+
+                else // seed was 8-10
+                {
+                    new zombieRunner(this);
+                    runners++;
+                }
+            }
+
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
+            MessageBox.Show("Runnners count: " + runners + " Tank count: " + tanks + " walker count: " + walkers);
             /* We start at hiz and move towards	loz */
         }
 
