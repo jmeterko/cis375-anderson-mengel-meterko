@@ -230,7 +230,7 @@ namespace ACFramework
 
     class cCritterZombie : cCritter
     {
-        public cCritterZombie(cGame pownergame)
+        public cCritterZombie(cGame pownergame, int zombieType)
             : base(pownergame)
         {
             addForce(new cForceGravity(25.0f, new cVector3(0.0f, -1, 0.00f)));
@@ -240,8 +240,21 @@ namespace ACFramework
             if (pownergame != null) //Just to be safe.
 
             addForce(new cForceObjectSeek(Player, 0.5f));
-            Sprite = new cSpriteQuake(ModelsMD2.Slith);
 
+            if (zombieType < 15)
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Slith);
+            }
+
+            else if (zombieType < 20)
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Tyrant);
+            }
+
+            else
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Runner);
+            }
 
             // example of setting a specific model
             // setSprite(new cSpriteQuake(ModelsMD2.Knight));
@@ -313,8 +326,8 @@ namespace ACFramework
 
     class zombieWalker : cCritterZombie
     {
-        public zombieWalker(cGame pownergame)
-            : base(pownergame)
+        public zombieWalker(cGame pownergame, int zombietype)
+            : base(pownergame, zombietype)
         {
                 setIsRunner(false);
                 setHitDamage(2);
@@ -332,8 +345,8 @@ namespace ACFramework
 
     class zombieTank : cCritterZombie
     {
-        public zombieTank(cGame pownergame)
-            : base(pownergame)
+        public zombieTank(cGame pownergame, int zombieType)
+            : base(pownergame, zombieType)
         {
             setIsRunner(false);
             setHitDamage(4);
@@ -352,8 +365,8 @@ namespace ACFramework
 
     class zombieRunner : cCritterZombie
     {
-        public zombieRunner(cGame pownergame)
-            : base(pownergame)
+        public zombieRunner(cGame pownergame, int zombietype)
+            : base(pownergame, zombietype)
         {
             setIsRunner(true);
             setHitDamage(1);
@@ -506,7 +519,12 @@ namespace ACFramework
             //remove critters and wall
             Biota.purgeCritters("cCritterWall");
             Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("zombieWalker");
+            Biota.purgeCritters("zombieTank");
+            Biota.purgeCritters("zombieRunner");
             Biota.purgeCritters("cCritterTreasure");
+
+            _zombiecount = 0;//reset count so seedCritters can be restarted
 
             setBorder(64.0f, 16.0f, 64.0f); // size of the world
 
@@ -548,12 +566,7 @@ namespace ACFramework
 
         public override void seedCritters()
         {
-            int zombieType = 0; //value used to determine which zombie will be spawned
-            int walkers = 0;
-            int runners = 0;
-            int tanks = 0;
             Random rand = new Random();//to be used to determine type of zombie to spawn
-
 
             Biota.purgeCritters("cCritterBullet");
             Biota.purgeCritters("cCritterZombie");
@@ -569,29 +582,25 @@ namespace ACFramework
                  * The 'runner' or fast zombie will be 8-10, making it a medium 'rarity'
                  */
 
-                zombieType = rand.Next(1, 11);//generate the zombie type seed
+                _zombietype = rand.Next(1, 30);//generate the zombie type seed
 
-                if (zombieType < 6)//if the seed was 1-5
+                if (_zombietype < 15)//if the seed was 1-5
                 {
-                    new zombieWalker(this);
-                    walkers++;
+                    new zombieWalker(this, _zombietype);
                 }
 
-                else if (zombieType < 8) //if the seed was 6 or 7
+                else if (_zombietype < 20) //if the seed was 6 or 7
                 {
-                    new zombieTank(this);
-                    tanks++;
+                    new zombieTank(this, _zombietype);
                 }
 
                 else // seed was 8-10
                 {
-                    new zombieRunner(this);
-                    runners++;
+                    new zombieRunner(this, _zombietype);
                 }
             }
 
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
-            MessageBox.Show("Runnners count: " + runners + " Tank count: " + tanks + " walker count: " + walkers);
             /* We start at hiz and move towards	loz */
         }
 
@@ -654,8 +663,15 @@ namespace ACFramework
             //(need to recheck propcount in case we just called seedCritters).
             int modelcount = Biota.count("cCritterZombie");
             int modelstoadd = _seedcount - modelcount;
-            for (int i = 0; i < modelstoadd; i++)
-                new cCritterZombie(this);
+
+            if (_zombiecount < _seedcount)//if # of zombies in room is less than set seed
+            {
+                for (int i = 0; i < modelstoadd; i++)
+                {//add new zombies until the count meets seed count
+                    new cCritterZombie(this, _zombietype);
+                    _zombiecount++;
+                }
+            }
             // (3) Maybe check some other conditions.
 
             if (wentThrough && (Age - startNewRoom) > 2.0f)
