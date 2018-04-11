@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-//testing purpose aanderson
 namespace ACFramework
 {
 
@@ -86,6 +85,7 @@ namespace ACFramework
         than the critter's center. We compute playerhigherthancritter before the collide,
         as collide can change the positions. */
             _baseAccessControl = 1;
+
             bool collided = base.collide(pcritter);
             _baseAccessControl = 0;
             if (!collided)
@@ -98,17 +98,33 @@ namespace ACFramework
                 addScore(10);
             }
 
+            else if (pcritter.Sprite.ModelState == State.Run)
+            {//awful way to check the type of sprite, but class variables were too big of a pain to check here
+                //if the sprite was a runner, deal 1 damage
+                if(pcritter.Sprite.ResourceID == 16003)
+                {
+                    damage(1);
+                }
+
+                //if the sprite was a tank, deal 4
+                else if (pcritter.Sprite.ResourceID == 16002)
+                {
+                    damage(4);
+                }
+
+                //if the sprite was a walker, deal 2
+                else if (pcritter.Sprite.ResourceID == 16001)
+                {
+                    damage(2);
+                }
+            }
+            
             //if the pcritter has been killed
             else if (pcritter.Sprite.ModelState == State.FallbackDie)
             {
                 Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
             }
-
-            else
-            {
-                damage(pcritter.getHitDamage());
-                Framework.snd.play(Sound.Crunch);
-            }
+            
             pcritter.die();
             return true;
         }
@@ -244,16 +260,19 @@ namespace ACFramework
             if (zombieType < 15)
             {
                 Sprite = new cSpriteQuake(ModelsMD2.Slith);
+                setHitDamage(2);
             }
 
             else if (zombieType < 20)
             {
                 Sprite = new cSpriteQuake(ModelsMD2.Tyrant);
+                setHitDamage(4);
             }
 
             else
             {
                 Sprite = new cSpriteQuake(ModelsMD2.Runner);
+                setHitDamage(1);
             }
 
             // example of setting a specific model
@@ -329,7 +348,6 @@ namespace ACFramework
         public zombieWalker(cGame pownergame, int zombietype)
             : base(pownergame, zombietype)
         {
-                setIsRunner(false);
                 setHitDamage(2);
                 setHealth(2);
         }
@@ -348,7 +366,6 @@ namespace ACFramework
         public zombieTank(cGame pownergame, int zombieType)
             : base(pownergame, zombieType)
         {
-            setIsRunner(false);
             setHitDamage(4);
             setHealth(4);
             _maxspeed = 1.5f;
@@ -368,16 +385,18 @@ namespace ACFramework
         public zombieRunner(cGame pownergame, int zombietype)
             : base(pownergame, zombietype)
         {
-            setIsRunner(true);
             setHitDamage(1);
             setHealth(1);
             _maxspeed = 5;
+            Sprite = new cSpriteQuake(ModelsMD2.Runner);
         }
+
 
         public override bool collide(cCritter pcritter)
         {
             damage(pcritter.getHitDamage());
             Framework.snd.play(Sound.Crunch);
+
 
             return true;
         }
@@ -429,6 +448,7 @@ namespace ACFramework
                 delete_me();            //delete the pickup, now that it has been used
                 return true;
             }
+
             else
             {
                 return false;
@@ -500,7 +520,14 @@ namespace ACFramework
             SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Concrete); //ceiling 
 
             WrapFlag = cCritter.BOUNCE;
-            _seedcount = 7;
+
+            //set variables to control amount of zombie critters to spawn
+            _seedcount = 9;
+            _walkerscount = 4;
+            _runnerscount = 3;
+            _tankscount = 2;
+
+
             setPlayer(new cCritter3DPlayer(this));
             _ptreasure = new cCritterTreasure(this);
 
@@ -567,6 +594,9 @@ namespace ACFramework
         public override void seedCritters()
         {
             Random rand = new Random();//to be used to determine type of zombie to spawn
+            int currentRunners = 0;
+            int currentTanks = 0;
+            int currentWalkers = 0;
 
             Biota.purgeCritters("cCritterBullet");
             Biota.purgeCritters("cCritterZombie");
@@ -574,31 +604,46 @@ namespace ACFramework
             {
 
                 /* Logic to Zombie Type Spawns :
-                 * The zombieType will be stored as an int, it is a # generated randomly between 1 and 10
+                 * The counts for types of zombies are set in cGame and setRooms
+                 * The local currentCounts of seededCritters will determine how many of each type to spawn
                  * The below conditionals will check what the number is, then set the zombies' health, speed, and damage hit strength
-                 * The numbers 1-10 determine these zombie stats. 
-                 * The 'walker' or regular zombie will be 1-5, making it more common
-                 * The 'tank' or heavy zombie will be 6 or 7, making it least common
-                 * The 'runner' or fast zombie will be 8-10, making it a medium 'rarity'
+                 * Set the sprite to the specific type, and make sure to set the zombie to the correct class
                  */
-
-                _zombietype = rand.Next(1, 30);//generate the zombie type seed
-
-                if (_zombietype < 15)//if the seed was 1-5
+                if (currentWalkers < _walkerscount)
                 {
-                    new zombieWalker(this, _zombietype);
+                    _zombietype = 1;//set type for zombie parameter
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);//create new zombie spawn
+                    spawn = new zombieWalker(this, _zombietype);//set spawn to correct type
+                    spawn.Sprite = new cSpriteQuake(ModelsMD2.Slith);//set the corresponding skin
+                    spawn.setHealth(2);
+                    currentWalkers++;//increase the local count
+                }
+                
+                else if (currentTanks < _tankscount)
+                {
+                    _zombietype = 19;
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);
+                    spawn = new zombieTank(this, _zombietype);
+                    spawn.Sprite = new cSpriteQuake(ModelsMD2.Tyrant);
+                    spawn.setHitDamage(4);//set damage of current zombie
+                    currentTanks++;
                 }
 
-                else if (_zombietype < 20) //if the seed was 6 or 7
+                else if (currentRunners < _runnerscount)
                 {
-                    new zombieTank(this, _zombietype);
+                    _zombietype = 28;
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);
+                    spawn = new zombieRunner(this, _zombietype);
+                    spawn.Sprite = new cSpriteQuake(ModelsMD2.Runner);
+                    spawn.setHitDamage(1);//set damage of current zombie
+                    currentRunners++;
                 }
-
-                else // seed was 8-10
-                {
-                    new zombieRunner(this, _zombietype);
-                }
+                    
+                    _zombiecount++;
+              
             }
+
+            MessageBox.Show("Runners: " + currentRunners + " Tanks : " + currentTanks + " Walkers " + currentWalkers);
 
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
             /* We start at hiz and move towards	loz */
@@ -650,6 +695,9 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+            int currentRunners = 0;
+            int currentTanks = 0;
+            int currentWalkers = 0;
 
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
@@ -659,19 +707,7 @@ namespace ACFramework
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
             }
-            // (2) Also don't let the the model count diminish.
-            //(need to recheck propcount in case we just called seedCritters).
-            int modelcount = Biota.count("cCritterZombie");
-            int modelstoadd = _seedcount - modelcount;
-
-            if (_zombiecount < _seedcount)//if # of zombies in room is less than set seed
-            {
-                for (int i = 0; i < modelstoadd; i++)
-                {//add new zombies until the count meets seed count
-                    new cCritterZombie(this, _zombietype);
-                    _zombiecount++;
-                }
-            }
+            
             // (3) Maybe check some other conditions.
 
             if (wentThrough && (Age - startNewRoom) > 2.0f)
