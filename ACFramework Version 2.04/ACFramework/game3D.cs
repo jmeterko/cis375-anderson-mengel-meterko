@@ -107,6 +107,7 @@ namespace ACFramework
             else
             {
                 damage(1);
+                Sprite.ModelState = State.ShotDown;
                 Framework.snd.play(Sound.Crunch);
             }
             pcritter.die();
@@ -319,7 +320,6 @@ namespace ACFramework
             : base(pownergame)
         {
             setHealth(4);
-  
         }
     }
 
@@ -544,6 +544,7 @@ namespace ACFramework
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {
                 _gameover = true;
+                
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
@@ -568,6 +569,12 @@ namespace ACFramework
             }
         }
 
+        public void checkDeath(cSprite Sprite)
+        {
+            if (_gameover == true)
+            {
+                Sprite.setstate(State.FallForwardDie, 0, 170, StateType.Hold);
+            }
+        }
     }
-
 }
