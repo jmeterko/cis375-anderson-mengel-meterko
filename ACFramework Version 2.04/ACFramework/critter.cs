@@ -20,7 +20,9 @@ namespace ACFramework
         public static readonly int MF_VELOCITY = 0x00000004;
         public static readonly int MF_ALL = cCritter.MF_POSITION | cCritter.MF_VELOCITY; //MF_POSITION | MF_VELOCITY 
         //variables to modify specific behavior of the critter class
-        public static bool isAlive = true;
+        public static bool isAlive = true;//for collision affects
+        public static bool isRunner = false;//for damage modifiers and 'debuffs'
+        public static int hitDamage = 2;//for actual damage dealt by critter
         //Wrapflag values specify possible behaviors when critter hits edge of world.
         public static readonly int BOUNCE = 0;
         public static readonly int WRAP = 1;
@@ -60,6 +62,7 @@ namespace ACFramework
         protected bool _shieldflag; //Immunity to being damage() calls.
         protected uint _personality; /* Random bits to sometimes use for making critters have different
 			behaviors, as when using evasion forces. */
+        protected bool _collecteditem;//variable to determine if treasure should be removed
         protected float _mutationstrength; /* Number between 0.0 and 1.0 controlling how different
 			a spawned copy will be. */
         protected cCritter _ptarget; /* In case you are following or dragging or watching or aimed at
@@ -171,9 +174,10 @@ namespace ACFramework
         protected cVector3 _oldposition; //This is used by the cCritterWall::collide method.
         protected cVector3 _oldtangent; //This is used by the cCritter::fixNormalAndBinormal method.
         protected cVector3 _wrapposition1, _wrapposition2, _wrapposition3; //Use for showing wrap in 2D 
+
         //Nonserialized Bookkeeping Fields ================================= 
-//        protected int _metrickey; /* Index into the _pownerbiota cBiota's _metric, can be used to
-//			look up metric values. _metrickey is NOT serialized.*/
+        //        protected int _metrickey; /* Index into the _pownerbiota cBiota's _metric, can be used to
+        //			look up metric values. _metrickey is NOT serialized.*/
         //================================================ 
         //Constructor and destructor and helpers ================================= 
         //================================================ 
@@ -192,6 +196,7 @@ namespace ACFramework
             _outcode = 0;
             _score = 0;
             isAlive = true;
+            isRunner = false;
             _newlevelscorestep = 0;
             _newlevelreward = 0;
             _value = 1;
@@ -228,6 +233,7 @@ namespace ACFramework
             _bounciness = 1.0f;
             _mutationstrength = MUTATIONSTRENGTH; //Default 0.6 (out of 1.0 max) 
             _ptarget = null;
+            _collecteditem = false;
 //            _metrickey = -1; //Put in a bad index by default 
             _psprite = new cSprite(); /* Let's always have a valid sprite.  The default cSprite looks
 			    like a circle, by the way. */
@@ -415,6 +421,42 @@ namespace ACFramework
         public virtual bool IsAlive()
         {
             return isAlive;
+        }
+
+        /// <summary>
+        /// Sets value to determine amount of damage that this critter will apply
+        /// hitDamage is default to 2
+        /// </summary>
+        public virtual void setHitDamage(int pDamage)
+        {
+            hitDamage = pDamage;
+        }
+
+        /// <summary>
+        /// returns the hitDamage of the critter (amount of damage that this critter will apply)
+        /// hitDamage is default to 2
+        /// </summary>
+        public virtual int getHitDamage()
+        {
+            return hitDamage;
+        }
+
+        /// <summary>
+        /// Sets flag to determine whether or not the critter should apply a different force affect based by type
+        /// isRunner controls whether this force should be applied on collision
+        /// </summary>
+        public virtual void setIsRunner(bool pState)
+        {
+            isRunner = pState;
+        }
+
+        /// <summary>
+        /// Returns flag to determine whether or not the critter is of the zombie runner type
+        /// if isRunner is true, the zombie's attack will apply a modifier on the player
+        /// </summary>
+        public virtual bool IsRunner()
+        {
+            return isRunner;
         }
 
         /// <summary>

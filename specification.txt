@@ -1,4 +1,4 @@
-PROJECT REQUIREMENTS (taken from the specification document):
+﻿PROJECT REQUIREMENTS (taken from the specification document):
 
 1)
    At least 3 distinct rooms with doorways between rooms (portal
@@ -10,9 +10,8 @@ or teleportation device[s])
 (made without seedCritters)
 4)
    At least 3 different MD2 models currently not in the original
-version of the AC Framework. Create different classes for each of these models.
-Must have different functionality from other classes. (See example on attached
-requirements sheet)
+version of the AC Framework. 
+
 5)
    At least 5 different states for the models (using
 Sprite.ModelState or Sprite.setstate)
@@ -91,7 +90,10 @@ sound, gun sound, boss sound, and victory sound.
 ============================================================================================================================
 COMPLETED SECTION  
 ============================================================================================================================
-
+4)Create different classes for each of these zombie types
+different damage behavior and value, different speed, different health too for the 3 classes
+All are derived from cZombieCritter
+zombieWalker, zombieTank, zombieRunner
 
 7)
    Making a bullet class to fire faster, but with less damage

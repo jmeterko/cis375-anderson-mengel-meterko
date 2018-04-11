@@ -106,8 +106,12 @@ namespace ACFramework
 
             else
             {
+<<<<<<< HEAD
                 damage(1);
                 Sprite.ModelState = State.ShotDown;
+=======
+                damage(pcritter.getHitDamage());
+>>>>>>> 5e36762e674b704db88c059f06a67d6fbed21c56
                 Framework.snd.play(Sound.Crunch);
             }
             pcritter.die();
@@ -229,10 +233,9 @@ namespace ACFramework
         }
     }
 
-    class cCritter3Dcharacter : cCritter
+    class cCritterZombie : cCritter
     {
-
-        public cCritter3Dcharacter(cGame pownergame)
+        public cCritterZombie(cGame pownergame)
             : base(pownergame)
         {
             addForce(new cForceGravity(25.0f, new cVector3(0.0f, -1, 0.00f)));
@@ -301,64 +304,131 @@ namespace ACFramework
 
         public override bool IsKindOf(string str)
         {
-            return str == "cCritter3Dcharacter" || base.IsKindOf(str);
+            return str == "cCritterZombie" || base.IsKindOf(str);
         }
 
         public override string RuntimeClass
         {
             get
             {
-                return "cCritter3Dcharacter";
+                return "cCritterZombie";
             }
         }
     }
 
-    class cCritterZombie : cCritter3Dcharacter
-    {        
-
-        public cCritterZombie(cGame pownergame)
+    class zombieWalker : cCritterZombie
+    {
+        public zombieWalker(cGame pownergame)
             : base(pownergame)
         {
-            setHealth(4);
+                setIsRunner(false);
+                setHitDamage(2);
+                setHealth(2);
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
         }
     }
 
+    class zombieTank : cCritterZombie
+    {
+        public zombieTank(cGame pownergame)
+            : base(pownergame)
+        {
+            setIsRunner(false);
+            setHitDamage(4);
+            setHealth(4);
+<<<<<<< HEAD
+=======
+            _maxspeed = 1.5f;
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
+        }
+    }
+
+    class zombieRunner : cCritterZombie
+    {
+        public zombieRunner(cGame pownergame)
+            : base(pownergame)
+        {
+            setIsRunner(true);
+            setHitDamage(1);
+            setHealth(1);
+            _maxspeed = 5;
+        }
+
+        public override bool collide(cCritter pcritter)
+        {
+            damage(pcritter.getHitDamage());
+            Framework.snd.play(Sound.Crunch);
+
+            return true;
+>>>>>>> 5e36762e674b704db88c059f06a67d6fbed21c56
+        }
+    }
+
+
     class cCritterTreasure : cCritter
-    {   // Try jumping through this hoop
+    {
+
+        Random randPos = new Random();
 
         public cCritterTreasure(cGame pownergame) :
         base(pownergame)
         {
-            /* The sprites look nice from afar, but bitmap speed is really slow
-		when you get close to them, so don't use this. */
-            cPolygon ppoly = new cPolygon(24);
-            ppoly.Filled = false;
-            ppoly.LineWidthWeight = 0.5f;
+            //set a polygon to a red diamond shape
+            cPolygon ppoly = new cPolygon();
+            ppoly.Filled = true;
+            ppoly.LineWidthWeight = 1.0f;
+            ppoly.setStarPolygon(2,1);
+            ppoly.FillColor = Color.Red;
+
+            //set the treasure to the created shape
             Sprite = ppoly;
-            _collidepriority = cCollider.CP_PLAYER + 1; /* Let this guy call collide on the
-			player, as his method is overloaded in a special way. */
-            rotate(new cSpin((float)Math.PI / 2.0f, new cVector3(0.0f, 0.0f, 1.0f))); /* Trial and error shows this
-			rotation works to make it face the z diretion. */
+
+            //set size and fix it in place so enemies don't push it around
             setRadius(cGame3D.TREASURERADIUS);
             FixedFlag = true;
-            moveTo(new cVector3(_movebox.Midx, _movebox.Midy - 2.0f,
-                _movebox.Loz - 1.5f * cGame3D.TREASURERADIUS));
+            
+
+            //make a random number to place treasure in room
+            moveTo(new cVector3(randPos.Next(-32,32), -15, randPos.Next(-32, 32)));
         }
 
 
         public override bool collide(cCritter pcritter)
         {
-            if (contains(pcritter)) //disk of pcritter is wholly inside my disk 
+            if (distanceTo(pcritter) + pcritter.Radius < Radius + 1) //if player gets within radius+1 of pickup (close but not inside of it)
             {
-                Framework.snd.play(Sound.Clap);
-                pcritter.addScore(100);
-                pcritter.addHealth(1);
-                pcritter.moveTo(new cVector3(_movebox.Midx, _movebox.Loy + 1.0f,
-                    _movebox.Hiz - 3.0f));
+                //play sound for pickup, add score, add health, and make the treasure go away.
+                Framework.snd.play(Sound.Hallelujah);
+                pcritter.addScore(50);
+                pcritter.addHealth(5);
+                _collecteditem = true;  //set flag to determine when to spawn new item
+
+                //this makes the pickup respawn in a new random location on pickup
+                //moveTo(new cVector3(randPos.Next(-32, 32), -15, randPos.Next(-32, 32)));
+
+                //this removes the pickup from the current room, so it doesn't respawn
+                delete_me();            //delete the pickup, now that it has been used
                 return true;
             }
             else
+            {
                 return false;
+            }
+            //return false;
         }
 
         //Checks if pcritter inside.
@@ -391,7 +461,7 @@ namespace ACFramework
     //======================cGame3D========================== 
     class cGame3D : cGame
     {
-        public static readonly float TREASURERADIUS = 1.2f;
+        public static readonly float TREASURERADIUS = 1.0f;
         public static readonly float WALLTHICKNESS = 0.5f;
         public static readonly float PLAYERRADIUS = 0.5f; //sets the player size
         public static readonly float MAXPLAYERSPEED = 10.0f; //sets the player speed
@@ -443,7 +513,8 @@ namespace ACFramework
         {
             //remove critters and wall
             Biota.purgeCritters("cCritterWall");
-            Biota.purgeCritters("cCritter3Dcharacter");
+            Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("cCritterTreasure");
 
             setBorder(64.0f, 16.0f, 64.0f); // size of the world
 
@@ -464,7 +535,6 @@ namespace ACFramework
             _seedcount = 7;
 
             WrapFlag = cCritter.BOUNCE;
-            setPlayer(new cCritter3DPlayer(this));
             _ptreasure = new cCritterTreasure(this);
 
             //create a door at a new position in the room
@@ -486,11 +556,50 @@ namespace ACFramework
 
         public override void seedCritters()
         {
+            int zombieType = 0; //value used to determine which zombie will be spawned
+            int walkers = 0;
+            int runners = 0;
+            int tanks = 0;
+            Random rand = new Random();//to be used to determine type of zombie to spawn
+
+
             Biota.purgeCritters("cCritterBullet");
-            Biota.purgeCritters("cCritter3Dcharacter");
+            Biota.purgeCritters("cCritterZombie");
             for (int i = 0; i < _seedcount; i++)
-                new cCritter3Dcharacter(this);
+            {
+
+                /* Logic to Zombie Type Spawns :
+                 * The zombieType will be stored as an int, it is a # generated randomly between 1 and 10
+                 * The below conditionals will check what the number is, then set the zombies' health, speed, and damage hit strength
+                 * The numbers 1-10 determine these zombie stats. 
+                 * The 'walker' or regular zombie will be 1-5, making it more common
+                 * The 'tank' or heavy zombie will be 6 or 7, making it least common
+                 * The 'runner' or fast zombie will be 8-10, making it a medium 'rarity'
+                 */
+
+                zombieType = rand.Next(1, 11);//generate the zombie type seed
+
+                if (zombieType < 6)//if the seed was 1-5
+                {
+                    new zombieWalker(this);
+                    walkers++;
+                }
+
+                else if (zombieType < 8) //if the seed was 6 or 7
+                {
+                    new zombieTank(this);
+                    tanks++;
+                }
+
+                else // seed was 8-10
+                {
+                    new zombieRunner(this);
+                    runners++;
+                }
+            }
+
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
+            MessageBox.Show("Runnners count: " + runners + " Tank count: " + tanks + " walker count: " + walkers);
             /* We start at hiz and move towards	loz */
         }
 
@@ -540,6 +649,7 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {
@@ -551,10 +661,10 @@ namespace ACFramework
             }
             // (2) Also don't let the the model count diminish.
             //(need to recheck propcount in case we just called seedCritters).
-            int modelcount = Biota.count("cCritter3Dcharacter");
+            int modelcount = Biota.count("cCritterZombie");
             int modelstoadd = _seedcount - modelcount;
             for (int i = 0; i < modelstoadd; i++)
-                new cCritter3Dcharacter(this);
+                new cCritterZombie(this);
             // (3) Maybe check some other conditions.
 
             if (wentThrough && (Age - startNewRoom) > 2.0f)
