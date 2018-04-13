@@ -21,8 +21,8 @@ namespace ACFramework
         public static readonly int MF_ALL = cCritter.MF_POSITION | cCritter.MF_VELOCITY; //MF_POSITION | MF_VELOCITY 
         //variables to modify specific behavior of the critter class
         public static bool isAlive = true;//for collision affects
-        public static bool isRunner = false;//for damage modifiers and 'debuffs'
         public static int hitDamage = 2;//for actual damage dealt by critter
+        public static int type = 1;
         //Wrapflag values specify possible behaviors when critter hits edge of world.
         public static readonly int BOUNCE = 0;
         public static readonly int WRAP = 1;
@@ -196,7 +196,6 @@ namespace ACFramework
             _outcode = 0;
             _score = 0;
             isAlive = true;
-            isRunner = false;
             _newlevelscorestep = 0;
             _newlevelreward = 0;
             _value = 1;
@@ -439,24 +438,6 @@ namespace ACFramework
         public virtual int getHitDamage()
         {
             return hitDamage;
-        }
-
-        /// <summary>
-        /// Sets flag to determine whether or not the critter should apply a different force affect based by type
-        /// isRunner controls whether this force should be applied on collision
-        /// </summary>
-        public virtual void setIsRunner(bool pState)
-        {
-            isRunner = pState;
-        }
-
-        /// <summary>
-        /// Returns flag to determine whether or not the critter is of the zombie runner type
-        /// if isRunner is true, the zombie's attack will apply a modifier on the player
-        /// </summary>
-        public virtual bool IsRunner()
-        {
-            return isRunner;
         }
 
         /// <summary>

@@ -68,6 +68,11 @@ namespace ACFramework
 			larger. */
         protected cLightingModel _plightingmodel;
         protected int _seedcount; //The current starting number of critters.
+        protected int _runnerscount; //The current starting number of runner critters.
+        protected int _tankscount; //The current starting number of tank critters.
+        protected int _walkerscount; //The current starting number of walker critters.
+        protected int _zombiecount; //The current number of critters in room
+        protected int _zombietype; //The current type of critter in room
         protected bool _gameover; //Is the game finished yet? 
         protected int _maxscore; //Target max score for a game 
         protected int _scorecorrection; //Extra points to give user to make his max score = _maxscore.
@@ -94,6 +99,11 @@ namespace ACFramework
         public cGame()
         {
             _seedcount = COUNTSTART;
+            _zombiecount = 0;
+            _runnerscount = 0;
+            _tankscount = 0;
+            _walkerscount = 0;
+            _zombietype = 0;
             _gameover = false;
             _maxscore = MAXSCORE;
             _scorecorrection = 0;

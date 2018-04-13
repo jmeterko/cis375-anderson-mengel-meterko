@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-//testing purpose aanderson
 namespace ACFramework
 {
 
@@ -70,6 +69,8 @@ namespace ACFramework
             AttitudeToMotionLock = false; //It looks nicer is you don't turn the player with motion.
             Attitude = new cMatrix3(new cVector3(0.0f, 0.0f, -1.0f), new cVector3(-1.0f, 0.0f, 0.0f),
                 new cVector3(0.0f, 1.0f, 0.0f), Position);
+
+
         }
 
         public override void update(ACView pactiveview, float dt)
@@ -86,6 +87,7 @@ namespace ACFramework
         than the critter's center. We compute playerhigherthancritter before the collide,
         as collide can change the positions. */
             _baseAccessControl = 1;
+
             bool collided = base.collide(pcritter);
             _baseAccessControl = 0;
             if (!collided)
@@ -94,10 +96,31 @@ namespace ACFramework
          with a Treasure is different, but we let the Treasure contol that collision. */
             if (playerhigherthancritter)
             {
-                Framework.snd.play(Sound.Goopy);
+                //Framework.snd.play(Sound.Goopy);
                 addScore(10);
             }
 
+            else if (pcritter.Sprite.ModelState == State.Run)
+            {//awful way to check the type of sprite, but class variables were too big of a pain to check here
+                //if the sprite was a runner, deal 1 damage
+                if(pcritter.Sprite.ResourceID == 16003)
+                {
+                    damage(1);
+                }
+
+                //if the sprite was a tank, deal 4
+                else if (pcritter.Sprite.ResourceID == 16002)
+                {
+                    damage(4);
+                }
+
+                //if the sprite was a walker, deal 2
+                else if (pcritter.Sprite.ResourceID == 16001)
+                {
+                    damage(2);
+                }
+            }
+            
             //if the pcritter has been killed
             else if (pcritter.Sprite.ModelState == State.FallbackDie)
             {
@@ -110,13 +133,14 @@ namespace ACFramework
                 damage(pcritter.getHitDamage());
                 Framework.snd.play(Sound.Crunch);
             }
+            
             pcritter.die();
             return true;
         }
 
         public override cCritterBullet shoot()
         {
-            Framework.snd.play(Sound.LaserFire);
+            Framework.snd.play(Sound.Pop);
             Sprite.ModelState = State.ShotButStillStanding;
             return base.shoot();
         }
@@ -231,18 +255,31 @@ namespace ACFramework
 
     class cCritterZombie : cCritter
     {
-        public cCritterZombie(cGame pownergame)
+        public cCritterZombie(cGame pownergame, int zombieType)
             : base(pownergame)
         {
             addForce(new cForceGravity(25.0f, new cVector3(0.0f, -1, 0.00f)));
             addForce(new cForceDrag(0.5f));  // default friction strength 0.5 
             Density = 2.0f;
-            MaxSpeed = 30.0f;
+            MaxSpeed = 10.0f;
             if (pownergame != null) //Just to be safe.
 
             addForce(new cForceObjectSeek(Player, 0.5f));
-            Sprite = new cSpriteQuake(ModelsMD2.Slith);
 
+            if (zombieType < 15)
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Slith);
+            }
+
+            else if (zombieType < 20)
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Tyrant);
+            }
+
+            else
+            {
+                Sprite = new cSpriteQuake(ModelsMD2.Runner);
+            }
 
             // example of setting a specific model
             // setSprite(new cSpriteQuake(ModelsMD2.Knight));
@@ -314,10 +351,9 @@ namespace ACFramework
 
     class zombieWalker : cCritterZombie
     {
-        public zombieWalker(cGame pownergame)
-            : base(pownergame)
+        public zombieWalker(cGame pownergame, int zombietype)
+            : base(pownergame, zombietype)
         {
-                setIsRunner(false);
                 setHitDamage(2);
                 setHealth(2);
         }
@@ -325,7 +361,7 @@ namespace ACFramework
         public override bool collide(cCritter pcritter)
         {
             damage(pcritter.getHitDamage());
-            Framework.snd.play(Sound.Crunch);
+            //Framework.snd.play(Sound.Crunch);
 
             return true;
         }
@@ -333,10 +369,9 @@ namespace ACFramework
 
     class zombieTank : cCritterZombie
     {
-        public zombieTank(cGame pownergame)
-            : base(pownergame)
+        public zombieTank(cGame pownergame, int zombieType)
+            : base(pownergame, zombieType)
         {
-            setIsRunner(false);
             setHitDamage(4);
             setHealth(4);
             _maxspeed = 1.5f;
@@ -345,7 +380,7 @@ namespace ACFramework
         public override bool collide(cCritter pcritter)
         {
             damage(pcritter.getHitDamage());
-            Framework.snd.play(Sound.Crunch);
+            //Framework.snd.play(Sound.Crunch);
 
             return true;
         }
@@ -353,20 +388,20 @@ namespace ACFramework
 
     class zombieRunner : cCritterZombie
     {
-        public zombieRunner(cGame pownergame)
-            : base(pownergame)
+        public zombieRunner(cGame pownergame, int zombietype)
+            : base(pownergame, zombietype)
         {
-            setIsRunner(true);
             setHitDamage(1);
             setHealth(1);
             _maxspeed = 5;
+            Sprite = new cSpriteQuake(ModelsMD2.Runner);
         }
+
 
         public override bool collide(cCritter pcritter)
         {
             damage(pcritter.getHitDamage());
-            Framework.snd.play(Sound.Crunch);
-
+            //Framework.snd.play(Sound.Crunch);
             return true;
 
         }
@@ -418,6 +453,7 @@ namespace ACFramework
                 delete_me();            //delete the pickup, now that it has been used
                 return true;
             }
+
             else
             {
                 return false;
@@ -489,17 +525,88 @@ namespace ACFramework
             SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             WrapFlag = cCritter.BOUNCE;
-            _seedcount = 7;
+
+            //set variables to control amount of zombie critters to spawn
+            _seedcount = 5;
+            _walkerscount = 3;
+            _runnerscount = 1;
+            _tankscount = 1;
+
             setPlayer(new cCritter3DPlayer(this));
             _ptreasure = new cCritterTreasure(this);
 
+
+            //create a critter door and set its size, location, and graphics
             cCritterDoor pdwall = new cCritterDoor(
-                new cVector3(_border.Lox, _border.Loy, _border.Midz),
-                new cVector3(_border.Lox, _border.Midy - 3, _border.Midz),
-                0.1f, 2, this);
-            cSpriteTextureBox pspritedoor =
-                new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Door);
+                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
+                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
+                5f, 0.1f, this);
+
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
             pdwall.Sprite = pspritedoor;
+
+            /* In this world the x and y go left and up respectively, while z comes out of the screen.
+		A wall views its "thickness" as in the y direction, which is up here, and its
+		"height" as in the z direction, which is into the screen. */
+            //First draw a wall with dy height resting on the bottom of the world.
+            float zpos = 0.0f; /* Point on the z axis where we set down the wall.  0 would be center,
+			halfway down the hall, but we can offset it if we like. */
+            float height = 0.5f * _border.YSize;
+            float ycenter = -_border.YRadius + height / 2.0f;
+            float wallthickness = cGame3D.WALLTHICKNESS;
+
+
+            //make a bunch of walls to create room layout
+            cCritterWall pwall = new cCritterWall(
+                new cVector3(_border.Midx + 0.0f, ycenter, zpos),
+                new cVector3(_border.Hix, ycenter, zpos), 
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cCritterWall pwall2 = new cCritterWall(
+                new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
+                new cVector3(_border.Hix - 32.0f, ycenter, zpos),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cCritterWall pwall3 = new cCritterWall(
+                new cVector3(_border.Midx - 90.0f, ycenter, zpos + 15.0f),
+                new cVector3(_border.Hix - 45.0f, ycenter, zpos + 1.0f),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cCritterWall pwall4 = new cCritterWall(
+                new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
+                new cVector3(_border.Hix - 2.0f, ycenter, zpos),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cCritterWall pwall5 = new cCritterWall(
+                new cVector3(_border.Midx - 20, ycenter, zpos - 5.0f),
+                new cVector3(_border.Hix - 20, ycenter, zpos - 35.0f),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            //set texture of the walls
+            cSpriteTextureBox pspritebox = new cSpriteTextureBox(pwall.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall2.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+            cSpriteTextureBox pspritebox3 = new cSpriteTextureBox(pwall3.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+            cSpriteTextureBox pspritebox4 = new cSpriteTextureBox(pwall4.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+            cSpriteTextureBox pspritebox5 = new cSpriteTextureBox(pwall5.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+
+
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+            pwall.Sprite = pspritebox;
+            pwall2.Sprite = pspritebox2;
+            pwall3.Sprite = pspritebox3;
+            pwall4.Sprite = pspritebox4;
+            pwall5.Sprite = pspritebox5;
         }
 
         //setRoom1 creates a new room when the player runs through the previous door
@@ -508,7 +615,12 @@ namespace ACFramework
             //remove critters and wall
             Biota.purgeCritters("cCritterWall");
             Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("zombieWalker");
+            Biota.purgeCritters("zombieTank");
+            Biota.purgeCritters("zombieRunner");
             Biota.purgeCritters("cCritterTreasure");
+
+            _zombiecount = 0;//reset count so seedCritters can be restarted
 
             setBorder(64.0f, 16.0f, 64.0f); // size of the world
 
@@ -526,7 +638,11 @@ namespace ACFramework
             SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
+            //set variables to control amount of zombie critters to spawn
             _seedcount = 7;
+            _walkerscount = 1;
+            _runnerscount = 4;
+            _tankscount = 2;
 
             WrapFlag = cCritter.BOUNCE;
             _ptreasure = new cCritterTreasure(this);
@@ -546,16 +662,16 @@ namespace ACFramework
             //set collision flag and reset age of new room
             wentThrough = true;
             startNewRoom = Age;
+
+            seedCritters();//make new critters for room
         }
 
         public override void seedCritters()
         {
-            int zombieType = 0; //value used to determine which zombie will be spawned
-            int walkers = 0;
-            int runners = 0;
-            int tanks = 0;
             Random rand = new Random();//to be used to determine type of zombie to spawn
-
+            int currentRunners = 0;
+            int currentTanks = 0;
+            int currentWalkers = 0;
 
             Biota.purgeCritters("cCritterBullet");
             Biota.purgeCritters("cCritterZombie");
@@ -563,37 +679,38 @@ namespace ACFramework
             {
 
                 /* Logic to Zombie Type Spawns :
-                 * The zombieType will be stored as an int, it is a # generated randomly between 1 and 10
+                 * The counts for types of zombies are set in cGame and setRooms
+                 * The local currentCounts of seededCritters will determine how many of each type to spawn
                  * The below conditionals will check what the number is, then set the zombies' health, speed, and damage hit strength
-                 * The numbers 1-10 determine these zombie stats. 
-                 * The 'walker' or regular zombie will be 1-5, making it more common
-                 * The 'tank' or heavy zombie will be 6 or 7, making it least common
-                 * The 'runner' or fast zombie will be 8-10, making it a medium 'rarity'
+                 * Set the sprite to the specific type, and make sure to set the zombie to the correct class
                  */
-
-                zombieType = rand.Next(1, 11);//generate the zombie type seed
-
-                if (zombieType < 6)//if the seed was 1-5
+                if (currentWalkers < _walkerscount)
                 {
-                    new zombieWalker(this);
-                    walkers++;
+                    _zombietype = 1;//set type for zombie parameter
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);//create new zombie spawn
+                    spawn = new zombieWalker(this, _zombietype);//set spawn to correct type
+                    currentWalkers++;//increase the local count
+                }
+                
+                else if (currentTanks < _tankscount)
+                {
+                    _zombietype = 19;
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);
+                    spawn = new zombieTank(this, _zombietype);
+                    currentTanks++;
                 }
 
-                else if (zombieType < 8) //if the seed was 6 or 7
+                else if (currentRunners < _runnerscount)
                 {
-                    new zombieTank(this);
-                    tanks++;
+                    _zombietype = 28;
+                    cCritterZombie spawn = new cCritterZombie(this, _zombietype);
+                    spawn = new zombieRunner(this, _zombietype);
+                    currentRunners++;
                 }
-
-                else // seed was 8-10
-                {
-                    new zombieRunner(this);
-                    runners++;
-                }
+                    _zombiecount++;
             }
 
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
-            MessageBox.Show("Runnners count: " + runners + " Tank count: " + tanks + " walker count: " + walkers);
             /* We start at hiz and move towards	loz */
         }
 
@@ -643,6 +760,9 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+            int currentRunners = 0;
+            int currentTanks = 0;
+            int currentWalkers = 0;
 
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
@@ -653,12 +773,7 @@ namespace ACFramework
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
             }
-            // (2) Also don't let the the model count diminish.
-            //(need to recheck propcount in case we just called seedCritters).
-            int modelcount = Biota.count("cCritterZombie");
-            int modelstoadd = _seedcount - modelcount;
-            for (int i = 0; i < modelstoadd; i++)
-                new cCritterZombie(this);
+            
             // (3) Maybe check some other conditions.
 
             if (wentThrough && (Age - startNewRoom) > 2.0f)

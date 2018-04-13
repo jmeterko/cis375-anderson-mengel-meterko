@@ -347,6 +347,7 @@ namespace ACFramework
         public static readonly int Slith = 0;
         public static readonly int Tyrant = 1;
         public static readonly int Marine = 2;
+        public static readonly int Runner = 3;
 
 
         // at least one must be set true
@@ -354,6 +355,7 @@ namespace ACFramework
             new ModelsMD2Info( "slith", "chompers.pcx", 0.1f, true ),
             new ModelsMD2Info( "Tyrant", "hivetyrant.pcx", 0.0f, true ),
             new ModelsMD2Info( "marine", "Reese.pcx", 0.3f, false ),
+            new ModelsMD2Info( "insect", "spyder.pcx", 0.1f, true ),
         };
 
         private static int[] randomCritters;
