@@ -227,7 +227,6 @@ namespace ACFramework
 		} 
 
 		//For use with resrource bitmaps 
-
         public cTexture(Color color)
         {
             _cx = 1;
