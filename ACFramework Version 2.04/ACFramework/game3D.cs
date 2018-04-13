@@ -126,6 +126,13 @@ namespace ACFramework
             {
                 Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
             }
+
+            else
+            {
+                Sprite.ModelState = State.ShotDown;
+                damage(pcritter.getHitDamage());
+                Framework.snd.play(Sound.Crunch);
+            }
             
             pcritter.die();
             return true;
@@ -396,6 +403,7 @@ namespace ACFramework
             damage(pcritter.getHitDamage());
             //Framework.snd.play(Sound.Crunch);
             return true;
+
         }
     }
 
@@ -509,12 +517,12 @@ namespace ACFramework
             I am flying into the screen from HIZ towards LOZ, and
             LOX below and HIX above and
             LOY on the right and HIY on the left. */
-            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall3); //Make the near HIZ transparent 
-            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall3); //Far wall 
-            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall3); //left wall 
-            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall3); //right wall 
-            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Concrete); //floor 
-            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Concrete); //ceiling 
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             WrapFlag = cCritter.BOUNCE;
 
@@ -622,12 +630,12 @@ namespace ACFramework
             setSkyBox(skeleton);
 
             //set textures and graphics
-            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall3); //Make the near HIZ transparent 
-            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall3); //Far wall 
-            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall3); //left wall 
-            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall3); //right wall 
-            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Concrete); //floor 
-            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Concrete); //ceiling 
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
             //set variables to control amount of zombie critters to spawn
@@ -760,6 +768,7 @@ namespace ACFramework
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {
                 _gameover = true;
+                
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
@@ -779,6 +788,12 @@ namespace ACFramework
             }
         }
 
+        public void checkDeath(cSprite Sprite)
+        {
+            if (_gameover == true)
+            {
+                Sprite.setstate(State.FallForwardDie, 0, 170, StateType.Hold);
+            }
+        }
     }
-
 }
