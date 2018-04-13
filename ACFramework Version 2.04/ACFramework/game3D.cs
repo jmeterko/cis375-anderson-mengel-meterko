@@ -106,12 +106,8 @@ namespace ACFramework
 
             else
             {
-<<<<<<< HEAD
-                damage(1);
                 Sprite.ModelState = State.ShotDown;
-=======
                 damage(pcritter.getHitDamage());
->>>>>>> 5e36762e674b704db88c059f06a67d6fbed21c56
                 Framework.snd.play(Sound.Crunch);
             }
             pcritter.die();
@@ -343,8 +339,6 @@ namespace ACFramework
             setIsRunner(false);
             setHitDamage(4);
             setHealth(4);
-<<<<<<< HEAD
-=======
             _maxspeed = 1.5f;
         }
 
@@ -374,7 +368,7 @@ namespace ACFramework
             Framework.snd.play(Sound.Crunch);
 
             return true;
->>>>>>> 5e36762e674b704db88c059f06a67d6fbed21c56
+
         }
     }
 
@@ -487,12 +481,12 @@ namespace ACFramework
             I am flying into the screen from HIZ towards LOZ, and
             LOX below and HIX above and
             LOY on the right and HIY on the left. */
-            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall3); //Make the near HIZ transparent 
-            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall3); //Far wall 
-            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall3); //left wall 
-            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall3); //right wall 
-            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Concrete); //floor 
-            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Concrete); //ceiling 
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             WrapFlag = cCritter.BOUNCE;
             _seedcount = 7;
@@ -524,12 +518,12 @@ namespace ACFramework
             setSkyBox(skeleton);
 
             //set textures and graphics
-            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall3); //Make the near HIZ transparent 
-            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall3); //Far wall 
-            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall3); //left wall 
-            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall3); //right wall 
-            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Concrete); //floor 
-            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Concrete); //ceiling 
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
             _seedcount = 7;
