@@ -94,7 +94,6 @@ namespace ACFramework
             if (!collided)
                 return false;
 
-            MessageBox.Show(Cheat.ToString());
             /* If you're here, you collided.  We'll treat all the guys the same -- the collision
          with a Treasure is different, but we let the Treasure contol that collision. */
             if (!Cheat)//only check collisions if cheat is not active
@@ -538,6 +537,7 @@ namespace ACFramework
             _walkerscount = 3;
             _runnerscount = 1;
             _tankscount = 1;
+            _currentroom = 0;
 
             setPlayer(new cCritter3DPlayer(this));
             _ptreasure = new cCritterTreasure(this);
@@ -650,18 +650,274 @@ namespace ACFramework
             _walkerscount = 1;
             _runnerscount = 4;
             _tankscount = 2;
+            _currentroom = 1;
 
             WrapFlag = cCritter.BOUNCE;
             _ptreasure = new cCritterTreasure(this);
 
-            //create a door at a new position in the room
+            float zpos = 0.0f; /* Point on the z axis where we set down the wall.  0 would be center,
+			halfway down the hall, but we can offset it if we like. */
+            float height = 0.5f * _border.YSize;
+            float ycenter = -_border.YRadius + height / 2.0f;
+            float wallthickness = cGame3D.WALLTHICKNESS;
+
+            //create a critter door and set its size, location, and graphics
             cCritterDoor pdwall = new cCritterDoor(
-                new cVector3(_border.Lox, _border.Loy, _border.Midz),
-                new cVector3(_border.Lox, _border.Midy - 3, _border.Midz),
-                0.1f, 2, this);
-            cSpriteTextureBox pspritedoor =
-                new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Door);
+                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
+                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
+                5f, 0.1f, this);
+
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
             pdwall.Sprite = pspritedoor;
+
+            cCritterWall pwall2 = new cCritterWall(
+                new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
+                new cVector3(_border.Hix - 32.0f, ycenter, zpos),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall2.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+
+
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+            pwall2.Sprite = pspritebox2;
+
+            //move player to new position in next room
+            Player.moveTo(new cVector3(0.0f, -10.0f, 32.0f));
+
+            //set collision flag and reset age of new room
+            wentThrough = true;
+            startNewRoom = Age;
+
+            seedCritters();//make new critters for room
+        }
+
+        //setRoom2 creates a new room when the player runs through the previous door
+        public void setRoom2()
+        {
+            //remove critters and wall
+            Biota.purgeCritters("cCritterWall");
+            Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("zombieWalker");
+            Biota.purgeCritters("zombieTank");
+            Biota.purgeCritters("zombieRunner");
+            Biota.purgeCritters("cCritterTreasure");
+
+            _zombiecount = 0;//reset count so seedCritters can be restarted
+
+            setBorder(64.0f, 16.0f, 64.0f); // size of the world
+
+            //create new room 'shell'
+            cRealBox3 skeleton = new cRealBox3();
+            skeleton.copy(_border);
+            setSkyBox(skeleton);
+
+            //set textures and graphics
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
+
+            //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
+            //set variables to control amount of zombie critters to spawn
+            _seedcount = 7;
+            _walkerscount = 1;
+            _runnerscount = 4;
+            _tankscount = 2;
+            _currentroom = 2;
+
+            WrapFlag = cCritter.BOUNCE;
+            _ptreasure = new cCritterTreasure(this);
+
+            float zpos = 0.0f; /* Point on the z axis where we set down the wall.  0 would be center,
+			halfway down the hall, but we can offset it if we like. */
+            float height = 0.5f * _border.YSize;
+            float ycenter = -_border.YRadius + height / 2.0f;
+            float wallthickness = cGame3D.WALLTHICKNESS;
+
+            //create a critter door and set its size, location, and graphics
+            cCritterDoor pdwall = new cCritterDoor(
+                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
+                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
+                5f, 0.1f, this);
+
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            pdwall.Sprite = pspritedoor;
+
+            cCritterWall pwall = new cCritterWall(
+                new cVector3(_border.Midx - 90.0f, ycenter, zpos + 15.0f),
+                new cVector3(_border.Hix - 45.0f, ycenter, zpos + 1.0f),
+                height, //thickness param for wall's dy which goes perpendicular to the 
+                wallthickness, //height argument for this wall's dz  goes into the screen 
+                this);
+
+            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+
+
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+            pwall.Sprite = pspritebox2;
+
+            //move player to new position in next room
+            Player.moveTo(new cVector3(0.0f, -10.0f, 32.0f));
+
+            //set collision flag and reset age of new room
+            wentThrough = true;
+            startNewRoom = Age;
+
+            seedCritters();//make new critters for room
+        }
+
+        //setRoom3 creates a new room when the player runs through the previous door
+        public void setRoom3()
+        {
+            //remove critters and wall
+            Biota.purgeCritters("cCritterWall");
+            Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("zombieWalker");
+            Biota.purgeCritters("zombieTank");
+            Biota.purgeCritters("zombieRunner");
+            Biota.purgeCritters("cCritterTreasure");
+
+            _zombiecount = 0;//reset count so seedCritters can be restarted
+
+            setBorder(64.0f, 16.0f, 64.0f); // size of the world
+
+            //create new room 'shell'
+            cRealBox3 skeleton = new cRealBox3();
+            skeleton.copy(_border);
+            setSkyBox(skeleton);
+
+            //set textures and graphics
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
+
+            //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
+            //set variables to control amount of zombie critters to spawn
+            _seedcount = 7;
+            _walkerscount = 1;
+            _runnerscount = 4;
+            _tankscount = 2;
+            _currentroom = 3;
+
+            WrapFlag = cCritter.BOUNCE;
+            _ptreasure = new cCritterTreasure(this);
+
+            float zpos = 0.0f; /* Point on the z axis where we set down the wall.  0 would be center,
+			halfway down the hall, but we can offset it if we like. */
+            float height = 0.5f * _border.YSize;
+            float ycenter = -_border.YRadius + height / 2.0f;
+            float wallthickness = cGame3D.WALLTHICKNESS;
+
+            //create a critter door and set its size, location, and graphics
+            cCritterDoor pdwall = new cCritterDoor(
+                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
+                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
+                5f, 0.1f, this);
+
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            pdwall.Sprite = pspritedoor;
+
+            cCritterWall pwall = new cCritterWall(
+               new cVector3(_border.Midx - 20, ycenter, zpos - 5.0f),
+               new cVector3(_border.Hix - 20, ycenter, zpos - 35.0f),
+               height, //thickness param for wall's dy which goes perpendicular to the 
+               wallthickness, //height argument for this wall's dz  goes into the screen 
+               this);
+
+            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+
+
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+            pwall.Sprite = pspritebox2;
+
+            //move player to new position in next room
+            Player.moveTo(new cVector3(0.0f, -10.0f, 32.0f));
+
+            //set collision flag and reset age of new room
+            wentThrough = true;
+            startNewRoom = Age;
+
+            seedCritters();//make new critters for room
+        }
+
+        //setRoom4 creates a new room when the player runs through the previous door
+        public void setRoom4()
+        {
+            //remove critters and wall
+            Biota.purgeCritters("cCritterWall");
+            Biota.purgeCritters("cCritterZombie");
+            Biota.purgeCritters("zombieWalker");
+            Biota.purgeCritters("zombieTank");
+            Biota.purgeCritters("zombieRunner");
+            Biota.purgeCritters("cCritterTreasure");
+
+            _zombiecount = 0;//reset count so seedCritters can be restarted
+
+            setBorder(64.0f, 16.0f, 64.0f); // size of the world
+
+            //create new room 'shell'
+            cRealBox3 skeleton = new cRealBox3();
+            skeleton.copy(_border);
+            setSkyBox(skeleton);
+
+            //set textures and graphics
+            SkyBox.setSideTexture(cRealBox3.HIZ, BitmapRes.Wall1); //Make the near HIZ transparent 
+            SkyBox.setSideTexture(cRealBox3.LOZ, BitmapRes.Wall1); //Far wall 
+            SkyBox.setSideTexture(cRealBox3.LOX, BitmapRes.Wall1); //left wall 
+            SkyBox.setSideTexture(cRealBox3.HIX, BitmapRes.Wall1); //right wall 
+            SkyBox.setSideTexture(cRealBox3.LOY, BitmapRes.Metal); //floor 
+            SkyBox.setSideTexture(cRealBox3.HIY, BitmapRes.Ceiling); //ceiling 
+
+            //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
+            //set variables to control amount of zombie critters to spawn
+            _seedcount = 7;
+            _walkerscount = 1;
+            _runnerscount = 4;
+            _tankscount = 2;
+            _currentroom = 4;
+
+            WrapFlag = cCritter.BOUNCE;
+            _ptreasure = new cCritterTreasure(this);
+
+
+            float zpos = 0.0f; /* Point on the z axis where we set down the wall.  0 would be center,
+			halfway down the hall, but we can offset it if we like. */
+            float height = 0.5f * _border.YSize;
+            float ycenter = -_border.YRadius + height / 2.0f;
+            float wallthickness = cGame3D.WALLTHICKNESS;
+
+            //create a critter door and set its size, location, and graphics
+            cCritterDoor pdwall = new cCritterDoor(
+                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
+                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
+                5f, 0.1f, this);
+
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            pdwall.Sprite = pspritedoor;
+
+            cCritterWall pwall = new cCritterWall(
+               new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
+               new cVector3(_border.Hix - 2.0f, ycenter, zpos),
+               height, //thickness param for wall's dy which goes perpendicular to the 
+               wallthickness, //height argument for this wall's dz  goes into the screen 
+               this);
+
+            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+
+
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+            pwall.Sprite = pspritebox2;
 
             //move player to new position in next room
             Player.moveTo(new cVector3(0.0f, -10.0f, 32.0f));
@@ -790,8 +1046,29 @@ namespace ACFramework
 
             if (doorcollision == true)
             {
-                setRoom1();
-                doorcollision = false;
+                if (_currentroom == 0)
+                {
+                    setRoom1();
+                    doorcollision = false;
+                }
+
+                else if (_currentroom == 1)
+                {
+                    setRoom2();
+                    doorcollision = false;
+                }
+
+                else if (_currentroom == 2)
+                {
+                    setRoom3();
+                    doorcollision = false;
+                }
+
+                else if (_currentroom == 3)
+                {
+                    setRoom4();
+                    doorcollision = false;
+                }
             }
         }
 
