@@ -264,8 +264,9 @@ namespace ACFramework
         public static readonly int D = 17;
 
         //adding new keys to framework
-        public static readonly int F1 = 18;
-        public static readonly int F2 = 19;
+        public static readonly int F1 = 18;//gun switch
+        public static readonly int F2 = 19;//gun switch
+        public static readonly int F3 = 20; //cheat mode toggle
 
 
         public static Key[] key;
@@ -292,7 +293,8 @@ namespace ACFramework
                 Key.I,//16
                 Key.D,//17
                 Key.F1,//18
-                Key.F2//19
+                Key.F2,//19
+                Key.F3//20
             };
 
         }

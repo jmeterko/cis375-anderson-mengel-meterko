@@ -51,6 +51,7 @@ namespace ACFramework
             setRadius(cGame3D.PLAYERRADIUS);                    //Default cCritter.PLAYERRADIUS is 0.4.  
             setHealth(10);                                      //set health of player
             Mode = 'G';                                         //set default fire mode
+            Cheat = false;                                      //set Cheat mode flag : off
             moveTo(_movebox.LoCorner.add(new cVector3(0.0f, 0.0f, 2.0f)));
             WrapFlag = cCritter.CLAMP; //Use CLAMP so you stop dead at edges.
             Armed = true; //Let's use bullets.
@@ -92,39 +93,45 @@ namespace ACFramework
             _baseAccessControl = 0;
             if (!collided)
                 return false;
+
             /* If you're here, you collided.  We'll treat all the guys the same -- the collision
          with a Treasure is different, but we let the Treasure contol that collision. */
-            if (playerhigherthancritter)
+            if (!Cheat)//only check collisions if cheat is not active
             {
-                //Framework.snd.play(Sound.Goopy);
-                addScore(10);
-            }
 
-            else if (pcritter.Sprite.ModelState == State.Run)
-            {//awful way to check the type of sprite, but class variables were too big of a pain to check here
-                //if the sprite was a runner, deal 1 damage
-                if(pcritter.Sprite.ResourceID == 16003)
+                if (playerhigherthancritter)
                 {
-                    damage(1);
+                    //Framework.snd.play(Sound.Goopy);
+                    addScore(10);
                 }
 
-                //if the sprite was a tank, deal 4
-                else if (pcritter.Sprite.ResourceID == 16002)
-                {
-                    damage(4);
-                }
+                else if (pcritter.Sprite.ModelState == State.Run)
+                {//awful way to check the type of sprite, but class variables were too big of a pain to check here
+                 //if the sprite was a runner, deal 1 damage
+                    if (pcritter.Sprite.ResourceID == 16003)
+                    {
+                        damage(1);
+                    }
 
-                //if the sprite was a walker, deal 2
-                else if (pcritter.Sprite.ResourceID == 16001)
-                {
-                    damage(2);
+                    //if the sprite was a tank, deal 4
+                    else if (pcritter.Sprite.ResourceID == 16002)
+                    {
+                        damage(4);
+                    }
+
+                    //if the sprite was a walker, deal 2
+                    else if (pcritter.Sprite.ResourceID == 16001)
+                    {
+                        damage(2);
+                    }
+
+
+                    //if the pcritter has been killed
+                    else if (pcritter.Sprite.ModelState == State.FallbackDie)
+                    {
+                        Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
+                    }
                 }
-            }
-            
-            //if the pcritter has been killed
-            else if (pcritter.Sprite.ModelState == State.FallbackDie)
-            {
-                Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
             }
             
             pcritter.die();
@@ -152,6 +159,7 @@ namespace ACFramework
         }
 
         public static char Mode { get; internal set; }
+        public static bool Cheat { get; internal set; }
     }
 
 
@@ -317,8 +325,6 @@ namespace ACFramework
         public override void update(ACView pactiveview, float dt)
         {
             base.update(pactiveview, dt); //Always call this first
-            if ((_outcode & cRealBox3.BOX_HIZ) != 0) /* use bitwise AND to check if a flag is set. */
-                delete_me(); //tell the game to remove yourself if you fall up to the hiz.
         }
 
         // do a delete_me if you hit the left end 

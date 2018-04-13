@@ -476,6 +476,7 @@ namespace ACFramework
             bool pagedown = Framework.Keydev[vk.PageDown];
             bool F1 = Framework.Keydev[vk.F1];
             bool F2 = Framework.Keydev[vk.F2];
+            bool F3 = Framework.Keydev[vk.F3];
 
             if (F1)
             {
@@ -488,6 +489,20 @@ namespace ACFramework
                 cCritter3DPlayer.Mode = 'F';
                 return;
             }
+
+            if (F3)//if c was pressed
+            {       //determine whether cheat is already true or not
+                if(cCritter3DPlayer.Cheat == true)
+                {
+                    cCritter3DPlayer.Cheat = false;//if true, then set false
+                }
+
+                else//else false, then set true
+                {
+                    cCritter3DPlayer.Cheat = true;
+                }
+            }
+
             if (!_hopping && up)
             {
                 pcritter.Velocity = pcritter.AttitudeTangent.mult(pcritter.MaxSpeed);//if pressing up, move forward at reduced speed and make the model run
