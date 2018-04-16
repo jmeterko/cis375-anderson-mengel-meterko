@@ -261,6 +261,89 @@ namespace ACFramework
         }
     }
 
+    class cCritterBoss : cCritter
+    {
+        public cCritterBoss(cGame pownergame)
+            : base(pownergame)
+        {
+            addForce(new cForceGravity(25.0f, new cVector3(0.0f, -1, 0.00f)));
+            addForce(new cForceDrag(0.5f));  // default friction strength 0.5 
+            Density = 2.0f;
+            MaxSpeed = 10.0f;
+            if (pownergame != null) //Just to be safe.
+                Sprite = new cSpriteQuake(ModelsMD2.Tyrant);
+
+            addForce(new cForceObjectSeek(Player, 0.5f));
+
+
+
+            // example of setting a specific model
+            // setSprite(new cSpriteQuake(ModelsMD2.Knight));
+
+            if (Sprite.IsKindOf("cSpriteQuake")) //Don't let the figurines tumble.  
+            {
+                AttitudeToMotionLock = false;
+                Attitude = new cMatrix3(new cVector3(0.0f, 0.0f, 1.0f),
+                    new cVector3(1.0f, 0.0f, 0.0f),
+                    new cVector3(0.0f, 1.0f, 0.0f), Position);
+                /* Orient them so they are facing towards positive Z with heads towards Y. */
+            }
+            Bounciness = 0.0f; //Not 1.0 means it loses a bit of energy with each bounce.
+            setRadius(6.0f);   //set size of generated critter sprites
+            MinTwitchThresholdSpeed = 4.0f; //Means sprite doesn't switch direction unless it's moving fast 
+            randomizePosition(new cRealBox3(new cVector3(_movebox.Lox, _movebox.Loy, _movebox.Loz + 4.0f),
+                new cVector3(_movebox.Hix, _movebox.Loy, _movebox.Midz - 1.0f)));
+            /* I put them ahead of the player  */
+            randomizeVelocity(0.0f, 30.0f, false);
+
+
+            if (pownergame != null) //Then we know we added this to a game so pplayer() is valid 
+                addForce(new cForceObjectSeek(Player, 0.5f));
+
+            int begf = Framework.randomOb.random(0, 171);
+            int endf = Framework.randomOb.random(0, 171);
+
+            if (begf > endf)
+            {
+                int temp = begf;
+                begf = endf;
+                endf = temp;
+            }
+
+            Sprite.setstate(State.Run, begf, endf, StateType.Repeat);
+
+            _wrapflag = cCritter.BOUNCE;
+
+        }
+
+
+        public override void update(ACView pactiveview, float dt)
+        {
+            base.update(pactiveview, dt); //Always call this first
+        }
+
+        // do a delete_me if you hit the left end 
+
+        public override void die()
+        {
+            base.die();
+        }
+
+        public override bool IsKindOf(string str)
+        {
+            return str == "cCritterBoss" || base.IsKindOf(str);
+        }
+
+        public override string RuntimeClass
+        {
+            get
+            {
+                return "cCritterBoss";
+            }
+        }
+    }
+
+
     class cCritterZombie : cCritter
     {
         public cCritterZombie(cGame pownergame, int zombieType)
@@ -692,6 +775,7 @@ namespace ACFramework
             startNewRoom = Age;
 
             seedCritters();//make new critters for room
+            
         }
 
         //setRoom2 creates a new room when the player runs through the previous door
@@ -927,6 +1011,7 @@ namespace ACFramework
             startNewRoom = Age;
 
             seedCritters();//make new critters for room
+            spawnBoss();
         }
 
         public override void seedCritters()
@@ -977,6 +1062,11 @@ namespace ACFramework
             /* We start at hiz and move towards	loz */
         }
 
+        public void spawnBoss()
+        {
+            new cCritterBoss(this);
+            Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
+        }
 
         public void setdoorcollision() { doorcollision = true; }
 
