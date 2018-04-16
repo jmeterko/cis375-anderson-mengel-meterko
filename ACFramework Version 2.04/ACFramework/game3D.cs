@@ -894,16 +894,7 @@ namespace ACFramework
 			halfway down the hall, but we can offset it if we like. */
             float height = 0.5f * _border.YSize;
             float ycenter = -_border.YRadius + height / 2.0f;
-            float wallthickness = cGame3D.WALLTHICKNESS;
-
-            //create a critter door and set its size, location, and graphics
-            cCritterDoor pdwall = new cCritterDoor(
-                new cVector3(_border.Lox + 15, _border.Loy, _border.Midz - 32),
-                new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
-                5f, 0.1f, this);
-
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
-            pdwall.Sprite = pspritedoor;
+            float wallthickness = cGame3D.WALLTHICKNESS;          
 
             cCritterWall pwall = new cCritterWall(
                new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
@@ -931,7 +922,6 @@ namespace ACFramework
 
         public override void seedCritters()
         {
-            Random rand = new Random();//to be used to determine type of zombie to spawn
             int currentRunners = 0;
             int currentTanks = 0;
             int currentWalkers = 0;
