@@ -520,6 +520,27 @@ namespace ACFramework
                 pcritter.Sprite.ModelState = State.Idle;
             }
 
+            //if the flag to move walls is set
+            if (cGame.moveWalls)
+            {
+                //continuously add small direction adjustments to each wall, giving effect of motion
+                cGame.movingWall1.moveWall(new cVector3(-0.05f, 0.01f, 0.0f));
+                cGame.movingWall2.moveWall(new cVector3(0.05f, -0.01f, 0.0f));
+                cGame.movingWall3.moveWall(new cVector3(0.05f, 0.01f, 0.0f));
+                cGame.movingWall4.moveWall(new cVector3(-0.05f, -0.01f, 0.0f));
+
+                //once the wall reaches a certain x coordiante
+                if (cGame.movingWall1.Position.X > 30.0f)
+                {
+                    //stop moving the walls and delete them so they arent in the way
+                    cGame.moveWalls = false;
+                    cGame.movingWall1.delete_me();
+                    cGame.movingWall2.delete_me();
+                    cGame.movingWall3.delete_me();
+                    cGame.movingWall4.delete_me();
+                }
+            }
+
             //Now restore the y velocity.
             pcritter.Velocity = new cVector3(pcritter.Velocity.X, yvelocity, pcritter.Velocity.Z);
             //	Real inreversesign = inreverse?-1.0:1.0; 

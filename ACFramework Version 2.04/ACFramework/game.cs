@@ -8,6 +8,12 @@ namespace ACFramework
 {
     class cGame
     {
+
+        public static cCritterMovingWall movingWall1;
+        public static cCritterMovingWall movingWall2;
+        public static cCritterMovingWall movingWall3;
+        public static cCritterMovingWall movingWall4;
+        public static bool moveWalls = false;
         public static readonly int COUNTSMALL = 4;
         public static readonly int COUNTMEDIUM = 8;
         public static readonly int COUNTLARGE = 25;
@@ -686,7 +692,9 @@ namespace ACFramework
         }
 
         /// <summary>
-        /// Used to get or set the wrap flag for the game.  Use cCritter.BOUNCE for example, to have
+        /// Used to get or set the wrap flag for the game.  Use cCritter.
+        /// 
+        /// for example, to have
         /// critters bounce off of the edges of the world when they hit them.
         /// </summary>
         public virtual int WrapFlag

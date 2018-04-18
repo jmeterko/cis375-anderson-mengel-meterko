@@ -978,21 +978,52 @@ namespace ACFramework
 			halfway down the hall, but we can offset it if we like. */
             float height = 0.5f * _border.YSize;
             float ycenter = -_border.YRadius + height / 2.0f;
-            float wallthickness = cGame3D.WALLTHICKNESS;          
+            float wallthickness = cGame3D.WALLTHICKNESS;
 
-            cCritterWall pwall = new cCritterWall(
-               new cVector3(_border.Midx - 2.0f, ycenter, zpos + 10.0f),
-               new cVector3(_border.Hix - 2.0f, ycenter, zpos),
-               height, //thickness param for wall's dy which goes perpendicular to the 
-               wallthickness, //height argument for this wall's dz  goes into the screen 
-               this);
+            movingWall1 = new cCritterMovingWall(
+                           new cVector3(-_border.Midx, -ycenter, -zpos),
+                            new cVector3(-_border.Hix, -ycenter, -zpos),
+                            height, //thickness param for wall's dy which goes perpendicular to the 
+                            wallthickness, //height argument for this wall's dz  goes into the screen 
+                            this);
 
-            cSpriteTextureBox pspritebox2 = new cSpriteTextureBox(pwall.Skeleton, BitmapRes.Wall3, 16); //Sets all sides 
+            movingWall2 = new cCritterMovingWall(
+                          new cVector3(_border.Midx, ycenter, zpos),
+                           new cVector3(_border.Hix, ycenter, zpos),
+                           height, //thickness param for wall's dy which goes perpendicular to the 
+                           wallthickness, //height argument for this wall's dz  goes into the screen 
+                           this);
 
+            movingWall3 = new cCritterMovingWall(
+                          new cVector3(-_border.Midx, -ycenter, -zpos),
+                           new cVector3(_border.Hix, -ycenter, zpos),
+                           height, //thickness param for wall's dy which goes perpendicular to the 
+                           wallthickness, //height argument for this wall's dz  goes into the screen 
+                           this);
+
+            movingWall4 = new cCritterMovingWall(
+                          new cVector3(_border.Midx, ycenter, -zpos),
+                           new cVector3(-_border.Hix, ycenter, -zpos),
+                           height, //thickness param for wall's dy which goes perpendicular to the 
+                           wallthickness, //height argument for this wall's dz  goes into the screen 
+                           this);
+
+
+            cSpriteTextureBox movingWallSpriteBox = new cSpriteTextureBox(movingWall1.Skeleton, BitmapRes.Metal, 1); //Sets all sides 
+            cSpriteTextureBox movingWallSpriteBox2 = new cSpriteTextureBox(movingWall2.Skeleton, BitmapRes.Metal, 1); //Sets all sides 
+            cSpriteTextureBox movingWallSpriteBox3 = new cSpriteTextureBox(movingWall3.Skeleton, BitmapRes.Metal, 1); //Sets all sides 
+            cSpriteTextureBox movingWallSpriteBox4 = new cSpriteTextureBox(movingWall4.Skeleton, BitmapRes.Metal, 1); //Sets all sides 
+            /* We'll tile our sprites three times along the long sides, and on the
+        short ends, we'll only tile them once, so we reset these two. */
+
+            movingWall1.Sprite = movingWallSpriteBox;
+            movingWall2.Sprite = movingWallSpriteBox2;
+            movingWall3.Sprite = movingWallSpriteBox3;
+            movingWall4.Sprite = movingWallSpriteBox4;
+            moveWalls = true;
 
             /* We'll tile our sprites three times along the long sides, and on the
         short ends, we'll only tile them once, so we reset these two. */
-            pwall.Sprite = pspritebox2;
 
             //move player to new position in next room
             Player.moveTo(new cVector3(0.0f, -10.0f, 32.0f));
@@ -1103,9 +1134,6 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
-            int currentRunners = 0;
-            int currentTanks = 0;
-            int currentWalkers = 0;
 
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
