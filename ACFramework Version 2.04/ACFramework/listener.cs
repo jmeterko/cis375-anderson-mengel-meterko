@@ -524,10 +524,10 @@ namespace ACFramework
             if (cGame.moveWalls)
             {
                 //continuously add small direction adjustments to each wall, giving effect of motion
-                cGame.movingWall1.moveWall(new cVector3(-0.05f, 0.01f, 0.0f));
-                cGame.movingWall2.moveWall(new cVector3(0.05f, -0.01f, 0.0f));
-                cGame.movingWall3.moveWall(new cVector3(0.05f, 0.01f, 0.0f));
-                cGame.movingWall4.moveWall(new cVector3(-0.05f, -0.01f, 0.0f));
+                cGame.movingWall1.moveWall(new cVector3(-0.009f, 0.002f, 0.0f));
+                cGame.movingWall2.moveWall(new cVector3(0.009f, -0.002f, 0.0f));
+                cGame.movingWall3.moveWall(new cVector3(0.009f, 0.002f, 0.0f));
+                cGame.movingWall4.moveWall(new cVector3(-0.009f, -0.002f, 0.0f));
 
                 //once the wall reaches a certain x coordiante
                 if (cGame.movingWall1.Position.X > 30.0f)
