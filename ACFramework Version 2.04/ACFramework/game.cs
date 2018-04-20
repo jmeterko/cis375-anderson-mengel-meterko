@@ -8,6 +8,12 @@ namespace ACFramework
 {
     class cGame
     {
+
+        public static cCritterMovingWall movingWall1;
+        public static cCritterMovingWall movingWall2;
+        public static cCritterMovingWall movingWall3;
+        public static cCritterMovingWall movingWall4;
+        public static bool moveWalls = false;
         public static readonly int COUNTSMALL = 4;
         public static readonly int COUNTMEDIUM = 8;
         public static readonly int COUNTLARGE = 25;
@@ -71,6 +77,7 @@ namespace ACFramework
         protected int _runnerscount; //The current starting number of runner critters.
         protected int _tankscount; //The current starting number of tank critters.
         protected int _walkerscount; //The current starting number of walker critters.
+        protected int _currentroom;//The current room the player is in
         protected int _zombiecount; //The current number of critters in room
         protected int _zombietype; //The current type of critter in room
         protected bool _gameover; //Is the game finished yet? 
@@ -104,6 +111,7 @@ namespace ACFramework
             _tankscount = 0;
             _walkerscount = 0;
             _zombietype = 0;
+            _currentroom = 0;
             _gameover = false;
             _maxscore = MAXSCORE;
             _scorecorrection = 0;
@@ -684,7 +692,9 @@ namespace ACFramework
         }
 
         /// <summary>
-        /// Used to get or set the wrap flag for the game.  Use cCritter.BOUNCE for example, to have
+        /// Used to get or set the wrap flag for the game.  Use cCritter.
+        /// 
+        /// for example, to have
         /// critters bounce off of the edges of the world when they hit them.
         /// </summary>
         public virtual int WrapFlag
