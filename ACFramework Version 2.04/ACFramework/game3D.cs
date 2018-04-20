@@ -94,7 +94,6 @@ namespace ACFramework
             if (!collided)
                 return false;
 
-            MessageBox.Show(Cheat.ToString());
             /* If you're here, you collided.  We'll treat all the guys the same -- the collision
          with a Treasure is different, but we let the Treasure contol that collision. */
             if (!Cheat)//only check collisions if cheat is not active
@@ -109,6 +108,7 @@ namespace ACFramework
                 else if (pcritter.Sprite.ModelState == State.Run)
                 {//awful way to check the type of sprite, but class variables were too big of a pain to check here
                  //if the sprite was a runner, deal 1 damage
+                    Sprite.ModelState = State.ShotInShoulder;
                     if (pcritter.Sprite.ResourceID == 16003)
                     {
                         damage(1);
@@ -249,7 +249,7 @@ namespace ACFramework
                     pcritter.Sprite.ModelState = State.FallbackDie;
                     pcritter.clearForcelist();
                     pcritter.addForce(new cForceDrag(50.0f));
-                    pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, -1, 0)));
+                    pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, 0, 0)));
                     pcritter.setIsAlive(false);
 
                     //add score for killing a Critter
@@ -549,7 +549,7 @@ namespace ACFramework
                 new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
                 5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
             /* In this world the x and y go left and up respectively, while z comes out of the screen.
