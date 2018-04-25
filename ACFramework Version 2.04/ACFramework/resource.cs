@@ -34,6 +34,8 @@ namespace ACFramework
         public static readonly int Sky = 6;
         public static readonly int Wood2 = 7;
         public static readonly int Concrete = 8;
+
+        //=== Requirement # 7 (3 new textures) ===//
         public static readonly int Mandala = 9;
         public static readonly int Metal = 10;
         public static readonly int Wall1 = 11;
@@ -272,6 +274,7 @@ namespace ACFramework
         public static readonly int D = 17;
 
         //adding new keys to framework
+        //=== Requirement # 10 (3 new keys) ===//
         public static readonly int F1 = 18;//gun switch
         public static readonly int F2 = 19;//gun switch
         public static readonly int F3 = 20; //cheat mode toggle
@@ -353,6 +356,7 @@ namespace ACFramework
 
 
         // at least one must be set true
+        //=== Requirement # 4 (At least 3 new models) ===//
         private static readonly ModelsMD2Info[] minfo = {
             new ModelsMD2Info( "slith", "chompers.pcx", 0.1f, true ),
             new ModelsMD2Info( "Tyrant", "hivetyrant.pcx", 0.0f, true ),
