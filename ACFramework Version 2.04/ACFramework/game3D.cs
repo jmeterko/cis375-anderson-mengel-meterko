@@ -190,9 +190,9 @@ namespace ACFramework
 
                 if (playerhigherthancritter)
                 {
-                    //Framework.snd.play(Sound.Goopy);
                     addScore(10);
-                    pcritter.die();
+                    pcritter.Sprite.ModelState = State.FallbackDie;
+                    setForces(pcritter);
                 }
 
                 else if (pcritter.Sprite.ModelState == State.Run)
@@ -201,7 +201,8 @@ namespace ACFramework
                     if (pcritter.Sprite.ResourceID == 16003)
                     {
                         damage(1);
-                        pcritter.die();
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                        setForces(pcritter);
                     }
 
 
@@ -214,22 +215,16 @@ namespace ACFramework
                     else if (pcritter.Sprite.ResourceID == 16002)
                     {
                         damage(3);
-                        pcritter.die();
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                        setForces(pcritter);
                     }
 
                     //if the sprite was a walker, deal 2
                     else if (pcritter.Sprite.ResourceID == 16001)
                     {
                         damage(2);
-                        pcritter.die();
-                    }
-
-
-                    //if the pcritter has been killed
-                    else if (pcritter.Sprite.ModelState == State.FallbackDie)
-                    {
-                        Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
-                        pcritter.die();
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                        setForces(pcritter);
                     }
 
                     else
@@ -237,11 +232,11 @@ namespace ACFramework
                         Sprite.ModelState = State.ShotDown;
                         damage(pcritter.getHitDamage());
                         Framework.snd.play(Sound.Crunch);
-                        pcritter.die();
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                        setForces(pcritter);
                     }
                 }
             }
-     
             return true;
         }
 
@@ -346,11 +341,7 @@ namespace ACFramework
                 {
                     //set animation to dying, clear all forces, show critter slumped on ground then kill it
                     pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.clearForcelist();
-                    pcritter.addForce(new cForceDrag(50.0f));
-                    pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, -1, 0)));
-                    pcritter.setIsAlive(false);
-
+                    setForces(pcritter);
                     //add score for killing a Critter
                     Player.addScore(1);
                 }

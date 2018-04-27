@@ -262,6 +262,14 @@ namespace ACFramework
             _baseAccessControl = 0;
         }
 
+        public virtual void setForces(cCritter pcritter)
+        {
+            pcritter.clearForcelist();
+            pcritter.addForce(new cForceDrag(50.0f));
+            pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, -1, 0)));
+            pcritter.setIsAlive(false);
+        }
+
         /* Initializes fields, adds to pownergame
             if not null. With the NULL default for the pownergame argument, this  constructor
             doubles	as a no-argument constructor.  */
