@@ -1050,9 +1050,9 @@ namespace ACFramework
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
             //set variables to control amount of zombie critters to spawn
-            _seedcount = 3;
+            _seedcount = 7;
             _walkerscount = 0;
-            _runnerscount = 0;
+            _runnerscount = 4;
             _tankscount = 3;
             _currentroom = 3;
 
