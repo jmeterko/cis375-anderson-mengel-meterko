@@ -132,7 +132,7 @@ namespace ACFramework
         public cCritter3DPlayer(cGame pownergame)
             : base(pownergame)
         {
-            BulletClass = new cCritter3DPlayerBullet();
+            BulletClass = new cCritterNewBullet();
             Sprite = new cSpriteQuake(ModelsMD2.Marine);        //set player avatar to marine
             Sprite.SpriteAttitude = cMatrix3.scale(2, 0.8f, 0.4f);
             setRadius(cGame3D.PLAYERRADIUS);                    //Default cCritter.PLAYERRADIUS is 0.4.  
@@ -192,25 +192,26 @@ namespace ACFramework
                 {
                     addScore(10);
                     pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();                }
+                    setForces(pcritter);
+                }
 
                 else if (pcritter.Sprite.ModelState == State.Run)
                 {//awful way to check the type of sprite, but class variables were too big of a pain to check here
                  //if the sprite was a runner, deal 1 damage
+                    Sprite.ModelState = State.ShotInShoulder;
                     if (pcritter.Sprite.ResourceID == 16003)
                     {
                         damage(1);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        pcritter.die();
-                  
-                }
+                        setForces(pcritter);
+                    }
 
 
-                else if (pcritter.IsKindOf("cCritterBoss"))
+                    else if (pcritter.IsKindOf("cCritterBoss"))
                     {
                         damage(1);
 
-                        if(pcritter.Health < 1)
+                        if (pcritter.Health < 1)
                         {
                             setIsAlive(false);
                         }
@@ -221,18 +222,16 @@ namespace ACFramework
                     {
                         damage(3);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();
-               
-            }
+                        setForces(pcritter);
+                    }
 
-            //if the sprite was a walker, deal 2
-            else if (pcritter.Sprite.ResourceID == 16001)
+                    //if the sprite was a walker, deal 2
+                    else if (pcritter.Sprite.ResourceID == 16001)
                     {
                         damage(2);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                pcritter.die();
-            
-        }
+                        setForces(pcritter);
+                    }
 
                     else
                     {
@@ -240,11 +239,15 @@ namespace ACFramework
                         damage(pcritter.getHitDamage());
                         Framework.snd.play(Sound.Crunch);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();                }
+                        setForces(pcritter);
+                    }
 
                 }
+
             }
+
             return true;
+
         }
 
         public override cCritterBullet shoot()
@@ -272,14 +275,14 @@ namespace ACFramework
     }
 
 
-    class cCritter3DPlayerBullet : cCritterBullet
+    class cCritterNewBullet : cCritterBullet
     {
-        public cCritter3DPlayerBullet() { }
+        public cCritterNewBullet() { }
 
         public override cCritterBullet Create()
         // has to be a Create function for every type of bullet -- JC
         {
-            return new cCritter3DPlayerBullet();
+            return new cCritterNewBullet();
         }
 
         public override void initialize(cCritterArmed pshooter)
@@ -289,21 +292,21 @@ namespace ACFramework
             //if mode is set to game default - this weapon will do average damage, but has a slow delay between shots
             if (cCritter3DPlayer.Mode == 'G')
             {
-                cCritterArmed.setShotWait(0.10f);//sets the delay between bullets
-                _hitstrength = 2;                //sets the damage of bullet
-                Sprite = new cSpriteSphere();    //sets the appearance of bullet (to sphere)
-                Sprite.FillColor = Color.Black;  //sets the color of bullet
-                setRadius(0.2f);                 //sets the size of bullet
+                cCritterArmed.setShotWait(0.10f);    //sets the delay between bullets
+                _hitstrength = 1;                    //sets the damage of bullet
+                Sprite = new cSpriteSphere();        //sets the appearance of bullet (to sphere)
+                Sprite.FillColor = Color.DarkKhaki;  //sets the color of bullet
+                setRadius(0.2f);                     //sets the size of bullet
             }
 
             else//mode is F - alternate fire mode shoots faster than default bullets, but do less damage and bounce off walls
             {
-                cCritterArmed.setShotWait(0.00f); //sets the dealy between bullets
-                _hitstrength = 1;                 //sets the damage of bullet
+                cCritterArmed.setShotWait(0.00f); //sets the delay between bullets
+                _hitstrength = 2;                 //sets the damage of bullet
                 _dieatedges = false;              //sets the bullet to bounce off walls
                 Sprite = new cSpriteSphere();     //sets the appearance of bullet (to sphere)
-                Sprite.FillColor = Color.DarkRed; //sets the color of bullet
-                setRadius(0.08f);                 //sets the size of bullet            
+                Sprite.FillColor = Color.Red;     //sets the color of bullet
+                setRadius(0.1f);                  //sets the size of bullet            
             }
         }
 
@@ -348,6 +351,9 @@ namespace ACFramework
                 {
                     //set animation to dying, clear all forces, show critter slumped on ground then kill it
                     pcritter.Sprite.ModelState = State.FallbackDie;
+                    pcritter.clearForcelist();
+                    pcritter.addForce(new cForceDrag(50.0f));
+                    pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, 0, 0)));
                     setForces(pcritter);
                     //add score for killing a Critter
                     Player.addScore(1);
@@ -733,7 +739,7 @@ namespace ACFramework
                 new cVector3(_border.Lox + 25, _border.Midy - 3, _border.Midz - 32),
                 5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
             /* In this world the x and y go left and up respectively, while z comes out of the screen.
@@ -849,7 +855,7 @@ namespace ACFramework
                      new cVector3(_border.Lox + 45, _border.Midy - 3, _border.Midz - 32),
                      5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
             //make a bunch of walls to create room layout
@@ -964,7 +970,7 @@ namespace ACFramework
                 new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
                 5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
 
