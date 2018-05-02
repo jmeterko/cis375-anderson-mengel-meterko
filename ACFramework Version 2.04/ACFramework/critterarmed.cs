@@ -326,7 +326,7 @@ namespace ACFramework
 			Don't use the setCollidePriority mutator, as that forces a call to
 			pgame()->buildCollider(); */
             cSpriteSphere bulletsprite = new cSpriteSphere(cCritter.BULLETRADIUS, 6, 6);
-			bulletsprite.FillColor = Color.LightGreen; 
+			bulletsprite.FillColor = Color.Silver; 
 			Sprite = bulletsprite; /* Also sets cSprite._prismdz to CritterBullet.BULLETPRISMDZ. */ 
 		}
 
@@ -387,11 +387,9 @@ namespace ACFramework
                 return "cCritterBulletSilver";
             }
 		}
+	}
 
-
-	} 
-	
-	class cCritterBulletSilverMissile : cCritterBulletSilver 
+    class cCritterBulletSilverMissile : cCritterBulletSilver 
 	{ 
 		public static readonly new int SCOREVALUE = 20; 
 		public static readonly new float MAXSPEED = 10.0f; 
@@ -455,8 +453,6 @@ namespace ACFramework
                 return "cCritterBulletSilverMissile";
             }
 		}
-
-
 	} 
 	
 	class cCritterArmed : cCritter 
