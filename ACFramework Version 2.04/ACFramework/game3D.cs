@@ -1236,7 +1236,7 @@ namespace ACFramework
             if(boss != null && boss.Health <= 0)
             {
                 _gameover = true;
-
+                MessageBox.Show("YOU WON!");
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
