@@ -584,6 +584,7 @@ namespace ACFramework
 
     }
 
+     //=== Requirement # 2 (1 Moving wall class) ===//
     class cCritterMovingWall : cCritter
     {
         public const float THICKNESS = 0.2f;

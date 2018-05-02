@@ -2,6 +2,93 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
+/* / ============= CIS 375 - Semester Project ============= \
+ * Group Members:
+ *      Alex Anderson
+ *      Justin Mengel
+ *      Jerad Meterko
+ *      
+ * Game Description:
+ *      The player will be spawned into pre-determined rooms and have to escape to the next door. 
+ *      Waves of 'zombie' enemies of different types and behavior will spawn into each room and try to attack the player.
+ *      After the 3rd room, the final area contains a boss fight. If the player kills the boss, they win the game. Starting with 10 health,
+ *      more can be picked up (1 spawn per room) for 5 health and 50 points. Switching guns with the (FN +) F1, f2 keys, the two weapons have different
+ *      stats and behavior. One will shoot slower, but have better damage; while the other shoots faster with lower damage per hit. A cheat mode can be activated with F3,
+ *      giving the player immunity to damage.
+ *      
+ * Game Controls:
+ *      Arrow Keys - Directional Movement
+ *      Space Bar  - Fire Weapon
+ *      F1         - Default Weapon (Slower fire, higher damage)
+ *      F2         - Alternate Weapon (Faster fire, lower damage)
+ *      F3 (CHEAT) - Cheat Mode Toggle (Gives player immunity to damage)
+ *      
+ * Project Requirements:
+ *      The following project requirements will be listed below along with descriptions of how they were
+ *      fufilled within this project. Then the corresponding file location will be marked next to the description,
+ *      along with a comment near the code that will match back to this list. 
+ *      
+ *      // Example requirement tag. These will be located above the code fufilling the labled requirement
+ *      
+ *      -->  
+ *              //=== Requirement # 1 (Located in file: example.cs) ===//
+ *      
+ *      Requirements:
+ *      (1) [Located in game3D.cs]: At least 1 collide function with a special effect not in the original version.
+ *              Within each zombieClass, they will handle their collisions with the player seperately, dealing damage according to their stats. 
+ *              There is also a treasure collision that will give the player 5 health and 50 points. 
+ *      
+ *      (2) [critterwall.cs]: Implement 1 moving wall (opening door or moving platform) Must be created in a class derived from cCritterWall.
+ *              In the last room before the boss spawns, on the setRoom3(); method call, 4 walls start to slowly open revealing the final boss fight
+ *              MovingWalls are created in setRoom3() and their movement is determined in the listener class
+ *      
+ *      (3) [game3D.cs]: Add 5 different model states for the project
+ *              State.Run while player and critters are moving
+ *              State.FallbackDie when critters shot
+ *              State.ShotButStandingStill when firing
+ *              State.ShotDown 
+ *              State.ShotInShoulder when player is taking damage
+ *              
+ *      (4) [resource.cs]: Add 3 different models that currently are not in the acframework
+ *              Models for slith, marine, tyrant, and insect added
+ *      
+ *      (5) [game3D.cs]: Add a permanent model other than the player
+ *              Boss is added to the program as a permanent critter model using method spawnBoss();
+ *      
+ *      (6) [game3D.cs]: Add at least four distinct walls
+ *              See methods setRoom1(), setRoom2(), and setRoom3(). 
+ *              There is a lot of different walls. Average 5 different walls per room
+ *              
+ *      (7) [resource.cs]: Adding new textures for wall, floor, and ceiling.
+ *              Metal, Mandala, and Ceiling textures added in the resource file. 
+ *      
+ *      (8) [game3D.cs]: (Enable a cheat to override loss)
+ *              Pressing [Fn] + [F3] will make player invincible to damage. Boolean flag removes the check for collisions
+ *   
+ *      (9) [game3D.cs: Implement at least 3 distinct rooms with doorways between rooms (portal or teleportation device[s])
+ *              Rooms (entered through teleportation doorways) COllision sets new room and door collision check 
+ *              first default room cGame() constructor
+ *              setRoom1()
+ *              setRoom2()
+ *              setRoom3()
+ *              
+ *      (10) [resource.cs]: Implement at least one key (on the keyboard) not included
+ *              F1 - Sets default gun type with average damage
+ *              F2 - Sets alternate gun type with higher fire and lower damage
+ *              F3 - Sets the cheat mode so the player is immune to damamge
+ *      
+ *      ======================================================================
+ *      
+ *      (11) [game3D.cs]: Make at least 1 win to win and 1 way to lose
+ *              Loss: Player health is reduced to 0 or less, game is over
+ *              Win: Boss is killed and final score is displayed to user
+ *              
+ *      (12) [resource.cs]: Add in at least 3 sounds not included in the original version.
+ *              See resource file for included sounds
+ *              
+ *      (13) [game3D.cs]: Implement one bullet class must be derived from one of the existing bullet classes.
+ */
+
 namespace ACFramework
 {
 
@@ -96,15 +183,16 @@ namespace ACFramework
 
             /* If you're here, you collided.  We'll treat all the guys the same -- the collision
          with a Treasure is different, but we let the Treasure contol that collision. */
+
+            //=== Requirement # 8 (Enable cheat to override loss) ===//
             if (!Cheat)//only check collisions if cheat is not active
             {
 
                 if (playerhigherthancritter)
                 {
-                    //Framework.snd.play(Sound.Goopy);
                     addScore(10);
-                    pcritter.die();
-                }
+                    pcritter.Sprite.ModelState = State.FallbackDie;
+                    pcritter.die();                }
 
                 else if (pcritter.Sprite.ModelState == State.Run)
                 {//awful way to check the type of sprite, but class variables were too big of a pain to check here
@@ -113,53 +201,56 @@ namespace ACFramework
                     if (pcritter.Sprite.ResourceID == 16003)
                     {
                         damage(1);
+                        pcritter.Sprite.ModelState = State.FallbackDie;
                         pcritter.die();
-                    }
+                  
+                }
 
 
-                    else if (pcritter.IsKindOf("cCritterBoss"))
+                else if (pcritter.IsKindOf("cCritterBoss"))
                     {
                         damage(1);
+
+                        if(pcritter.Health < 1)
+                        {
+                            setIsAlive(false);
+                        }
                     }
 
                     //if the sprite was a tank, deal 4
                     else if (pcritter.Sprite.ResourceID == 16002)
                     {
                         damage(3);
-                        pcritter.die();
-                    }
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                    pcritter.die();
+               
+            }
 
-                    //if the sprite was a walker, deal 2
-                    else if (pcritter.Sprite.ResourceID == 16001)
+            //if the sprite was a walker, deal 2
+            else if (pcritter.Sprite.ResourceID == 16001)
                     {
                         damage(2);
-                        pcritter.die();
-                    }
-
-
-                    //if the pcritter has been killed
-                    else if (pcritter.Sprite.ModelState == State.FallbackDie)
-                    {
-                        Framework.snd.play(Sound.Crunch);//just make the sound and let pcritter.die() remove it, without player taking damage
-                        pcritter.die();
-                    }
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                pcritter.die();
+            
+        }
 
                     else
                     {
                         Sprite.ModelState = State.ShotDown;
                         damage(pcritter.getHitDamage());
                         Framework.snd.play(Sound.Crunch);
-                        pcritter.die();
-                    }
+                        pcritter.Sprite.ModelState = State.FallbackDie;
+                    pcritter.die();                }
+
                 }
             }
-     
             return true;
         }
 
         public override cCritterBullet shoot()
         {
-            Framework.snd.play(Sound.Pop);
+            Framework.snd.play(Sound.Gunfire);
             Sprite.ModelState = State.ShotButStillStanding;
             return base.shoot();
         }
@@ -262,7 +353,7 @@ namespace ACFramework
                     pcritter.addForce(new cForceDrag(50.0f));
                     pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, 0, 0)));
                     pcritter.setIsAlive(false);
-
+                    setForces(pcritter);
                     //add score for killing a Critter
                     Player.addScore(1);
                 }
@@ -273,6 +364,7 @@ namespace ACFramework
         }
     }
 
+    //=== Requirement # 5 (Make a permanent model class) ===//
     class cCritterBoss : cCritter
     {
         public cCritterBoss(cGame pownergame)
@@ -288,7 +380,7 @@ namespace ACFramework
 
             addForce(new cForceObjectSeek(Player, 0.5f));
 
-
+            
 
             // example of setting a specific model
             // setSprite(new cSpriteQuake(ModelsMD2.Knight));
@@ -537,13 +629,13 @@ namespace ACFramework
             moveTo(new cVector3(randPos.Next(-32,32), -15, randPos.Next(-32, 32)));
         }
 
-
+        //=== Requirement # 1 (1 New collision function) ===//
         public override bool collide(cCritter pcritter)
         {
             if (distanceTo(pcritter) + pcritter.Radius < Radius + 1) //if player gets within radius+1 of pickup (close but not inside of it)
             {
                 //play sound for pickup, add score, add health, and make the treasure go away.
-                Framework.snd.play(Sound.Hallelujah);
+                Framework.snd.play(Sound.Healing);
                 pcritter.addScore(50);
                 pcritter.addHealth(5);
                 _collecteditem = true;  //set flag to determine when to spawn new item
@@ -601,6 +693,7 @@ namespace ACFramework
         private bool doorcollision;
         private bool wentThrough = false;
         private float startNewRoom;
+        cCritter boss;
 
         public cGame3D()
         {
@@ -970,9 +1063,9 @@ namespace ACFramework
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
             //set variables to control amount of zombie critters to spawn
-            _seedcount = 3;
+            _seedcount = 7;
             _walkerscount = 0;
-            _runnerscount = 0;
+            _runnerscount = 4;
             _tankscount = 3;
             _currentroom = 3;
 
@@ -1038,8 +1131,11 @@ namespace ACFramework
             wentThrough = true;
             startNewRoom = Age;
 
-            seedCritters();//make new critters for room
             spawnBoss();
+            seedCritters();//make new critters for room
+            
+
+            
         }
 
         public override void seedCritters()
@@ -1091,9 +1187,10 @@ namespace ACFramework
 
         public void spawnBoss()
         {
-            new cCritterBoss(this);
+            boss =  new cCritterBoss(this);
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
         }
+
 
         public void setdoorcollision() { doorcollision = true; }
 
@@ -1140,15 +1237,35 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+            
+            if(boss != null && boss.Health <= 0)
+            {
+                _gameover = true;
+
+                Player.addScore(_scorecorrection); // So user can reach _maxscore  
+                //Framework.snd.play(Sound.Hallelujah);
+                return;
+            }
+
+            if(cCritter.isAlive == false)
+            {
+                _gameover = true;
+
+                Player.addScore(_scorecorrection); // So user can reach _maxscore  
+                //Framework.snd.play(Sound.Hallelujah);
+                return;
+            }
+            
+            
 
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {
                 _gameover = true;
-                
+               
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
-                return;
+                return; 
             }
             
             // (3) Maybe check some other conditions.
@@ -1163,18 +1280,21 @@ namespace ACFramework
                 if (_currentroom == 0)
                 {
                     setRoom1();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
 
                 else if (_currentroom == 1)
                 {
                     setRoom2();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
 
                 else if (_currentroom == 2)
                 {
                     setRoom3();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
             }
