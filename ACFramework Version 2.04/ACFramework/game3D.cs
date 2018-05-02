@@ -192,7 +192,8 @@ namespace ACFramework
                 {
                     addScore(10);
                     pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();                }
+                    setForces(pcritter);
+                }
 
                 else if (pcritter.Sprite.ModelState == State.Run)
                 {//awful way to check the type of sprite, but class variables were too big of a pain to check here
@@ -202,16 +203,15 @@ namespace ACFramework
                     {
                         damage(1);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        pcritter.die();
-                  
-                }
+                        setForces(pcritter);
+                    }
 
 
-                else if (pcritter.IsKindOf("cCritterBoss"))
+                    else if (pcritter.IsKindOf("cCritterBoss"))
                     {
                         damage(1);
 
-                        if(pcritter.Health < 1)
+                        if (pcritter.Health < 1)
                         {
                             setIsAlive(false);
                         }
@@ -222,18 +222,16 @@ namespace ACFramework
                     {
                         damage(3);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();
-               
-            }
+                        setForces(pcritter);
+                    }
 
-            //if the sprite was a walker, deal 2
-            else if (pcritter.Sprite.ResourceID == 16001)
+                    //if the sprite was a walker, deal 2
+                    else if (pcritter.Sprite.ResourceID == 16001)
                     {
                         damage(2);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                pcritter.die();
-            
-        }
+                        setForces(pcritter);
+                    }
 
                     else
                     {
@@ -241,11 +239,15 @@ namespace ACFramework
                         damage(pcritter.getHitDamage());
                         Framework.snd.play(Sound.Crunch);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                    pcritter.die();                }
+                        setForces(pcritter);
+                    }
 
                 }
+
             }
+
             return true;
+
         }
 
         public override cCritterBullet shoot()
@@ -352,7 +354,6 @@ namespace ACFramework
                     pcritter.clearForcelist();
                     pcritter.addForce(new cForceDrag(50.0f));
                     pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, 0, 0)));
-                    pcritter.setIsAlive(false);
                     setForces(pcritter);
                     //add score for killing a Critter
                     Player.addScore(1);
@@ -854,7 +855,7 @@ namespace ACFramework
                      new cVector3(_border.Lox + 45, _border.Midy - 3, _border.Midz - 32),
                      5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
             //make a bunch of walls to create room layout
@@ -969,7 +970,7 @@ namespace ACFramework
                 new cVector3(_border.Lox + 15, _border.Midy - 3, _border.Midz - 32),
                 5f, 0.1f, this);
 
-            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Graphics3);
+            cSpriteTextureBox pspritedoor = new cSpriteTextureBox(pdwall.Skeleton, BitmapRes.Mandala);
             pdwall.Sprite = pspritedoor;
 
 
