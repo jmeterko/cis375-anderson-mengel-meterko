@@ -192,8 +192,7 @@ namespace ACFramework
                 {
                     addScore(10);
                     pcritter.Sprite.ModelState = State.FallbackDie;
-                    setForces(pcritter);
-                }
+                    pcritter.die();                }
 
                 else if (pcritter.Sprite.ModelState == State.Run)
                 {//awful way to check the type of sprite, but class variables were too big of a pain to check here
@@ -202,13 +201,19 @@ namespace ACFramework
                     {
                         damage(1);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        setForces(pcritter);
-                    }
+                        pcritter.die();
+                  
+                }
 
 
-                    else if (pcritter.IsKindOf("cCritterBoss"))
+                else if (pcritter.IsKindOf("cCritterBoss"))
                     {
                         damage(1);
+
+                        if(pcritter.Health < 1)
+                        {
+                            setIsAlive(false);
+                        }
                     }
 
                     //if the sprite was a tank, deal 4
@@ -216,16 +221,18 @@ namespace ACFramework
                     {
                         damage(3);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        setForces(pcritter);
-                    }
+                    pcritter.die();
+               
+            }
 
-                    //if the sprite was a walker, deal 2
-                    else if (pcritter.Sprite.ResourceID == 16001)
+            //if the sprite was a walker, deal 2
+            else if (pcritter.Sprite.ResourceID == 16001)
                     {
                         damage(2);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        setForces(pcritter);
-                    }
+                pcritter.die();
+            
+        }
 
                     else
                     {
@@ -233,8 +240,8 @@ namespace ACFramework
                         damage(pcritter.getHitDamage());
                         Framework.snd.play(Sound.Crunch);
                         pcritter.Sprite.ModelState = State.FallbackDie;
-                        setForces(pcritter);
-                    }
+                    pcritter.die();                }
+
                 }
             }
             return true;
@@ -368,7 +375,7 @@ namespace ACFramework
 
             addForce(new cForceObjectSeek(Player, 0.5f));
 
-
+            
 
             // example of setting a specific model
             // setSprite(new cSpriteQuake(ModelsMD2.Knight));
@@ -681,6 +688,7 @@ namespace ACFramework
         private bool doorcollision;
         private bool wentThrough = false;
         private float startNewRoom;
+        cCritter boss;
 
         public cGame3D()
         {
@@ -1118,8 +1126,11 @@ namespace ACFramework
             wentThrough = true;
             startNewRoom = Age;
 
-            seedCritters();//make new critters for room
             spawnBoss();
+            seedCritters();//make new critters for room
+            
+
+            
         }
 
         public override void seedCritters()
@@ -1171,9 +1182,10 @@ namespace ACFramework
 
         public void spawnBoss()
         {
-            new cCritterBoss(this);
+            boss =  new cCritterBoss(this);
             Player.moveTo(new cVector3(0.0f, Border.Loy, Border.Hiz - 3.0f));
         }
+
 
         public void setdoorcollision() { doorcollision = true; }
 
@@ -1220,15 +1232,35 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
+            
+            if(boss != null && boss.Health <= 0)
+            {
+                _gameover = true;
+
+                Player.addScore(_scorecorrection); // So user can reach _maxscore  
+                //Framework.snd.play(Sound.Hallelujah);
+                return;
+            }
+
+            if(cCritter.isAlive == false)
+            {
+                _gameover = true;
+
+                Player.addScore(_scorecorrection); // So user can reach _maxscore  
+                //Framework.snd.play(Sound.Hallelujah);
+                return;
+            }
+            
+            
 
             // (1) End the game if the player is dead 
             if ((Health == 0) && !_gameover) //Player's been killed and game's not over.
             {
                 _gameover = true;
-                
+               
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
-                return;
+                return; 
             }
             
             // (3) Maybe check some other conditions.

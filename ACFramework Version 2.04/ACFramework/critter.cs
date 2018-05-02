@@ -267,7 +267,7 @@ namespace ACFramework
             pcritter.clearForcelist();
             pcritter.addForce(new cForceDrag(50.0f));
             pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, -1, 0)));
-            pcritter.setIsAlive(false);
+            //pcritter.setIsAlive(false);
         }
 
         /* Initializes fields, adds to pownergame
