@@ -129,6 +129,9 @@ namespace ACFramework
 
     class cCritter3DPlayer : cCritterArmedPlayer
     {
+        public static bool teleported = false;
+        public static bool gameWon = false;
+
         public cCritter3DPlayer(cGame pownergame)
             : base(pownergame)
         {
@@ -183,7 +186,6 @@ namespace ACFramework
 
             /* If you're here, you collided.  We'll treat all the guys the same -- the collision
          with a Treasure is different, but we let the Treasure contol that collision. */
-
             //=== Requirement # 8 (Enable cheat to override loss) ===//
             if (!Cheat)//only check collisions if cheat is not active
             {
@@ -1238,11 +1240,20 @@ namespace ACFramework
 
         public override void adjustGameParameters()
         {
-            
-            if(boss != null && boss.Health <= 0)
+            if (cCritter3DPlayer.Cheat && !cCritter3DPlayer.teleported)
+            {
+                setRoom3();
+                cCritter3DPlayer.teleported = true;
+            }
+
+            if (boss != null && boss.Health <= 0)
             {
                 _gameover = true;
-                MessageBox.Show("YOU WON!");
+                if (!cCritter3DPlayer.gameWon)
+                {
+                    MessageBox.Show("YOU WON!");
+                    cCritter3DPlayer.gameWon = true;
+                }
                 Player.addScore(_scorecorrection); // So user can reach _maxscore  
                 //Framework.snd.play(Sound.Hallelujah);
                 return;
