@@ -249,7 +249,7 @@ namespace ACFramework
 
         public override cCritterBullet shoot()
         {
-            Framework.snd.play(Sound.Pop);
+            Framework.snd.play(Sound.Gunfire);
             Sprite.ModelState = State.ShotButStillStanding;
             return base.shoot();
         }
@@ -630,7 +630,7 @@ namespace ACFramework
             if (distanceTo(pcritter) + pcritter.Radius < Radius + 1) //if player gets within radius+1 of pickup (close but not inside of it)
             {
                 //play sound for pickup, add score, add health, and make the treasure go away.
-                Framework.snd.play(Sound.Hallelujah);
+                Framework.snd.play(Sound.Healing);
                 pcritter.addScore(50);
                 pcritter.addHealth(5);
                 _collecteditem = true;  //set flag to determine when to spawn new item
@@ -1058,9 +1058,9 @@ namespace ACFramework
 
             //set number of critters to be created. Adjust numbers for increasing difficulty between rooms
             //set variables to control amount of zombie critters to spawn
-            _seedcount = 3;
+            _seedcount = 7;
             _walkerscount = 0;
-            _runnerscount = 0;
+            _runnerscount = 4;
             _tankscount = 3;
             _currentroom = 3;
 
@@ -1275,18 +1275,21 @@ namespace ACFramework
                 if (_currentroom == 0)
                 {
                     setRoom1();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
 
                 else if (_currentroom == 1)
                 {
                     setRoom2();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
 
                 else if (_currentroom == 2)
                 {
                     setRoom3();
+                    Framework.snd.play(Sound.Teleport);
                     doorcollision = false;
                 }
             }
