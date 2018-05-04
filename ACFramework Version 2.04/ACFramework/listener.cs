@@ -492,15 +492,7 @@ namespace ACFramework
 
             if (F3)//if c was pressed
             {       //determine whether cheat is already true or not
-                if(cCritter3DPlayer.Cheat == true)
-                {
-                    cCritter3DPlayer.Cheat = false;//if true, then set false
-                }
-
-                else//else false, then set true
-                {
                     cCritter3DPlayer.Cheat = true;
-                }
             }
 
             if (!_hopping && up)
