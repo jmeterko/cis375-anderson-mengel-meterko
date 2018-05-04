@@ -215,6 +215,7 @@ namespace ACFramework
 
                         if (pcritter.Health < 1)
                         {
+                            
                             setIsAlive(false);
                         }
                     }
@@ -358,6 +359,7 @@ namespace ACFramework
                     pcritter.addForce(new cForceGravity(25.0f, new cVector3(0, 0, 0)));
                     setForces(pcritter);
                     //add score for killing a Critter
+                    
                     Player.addScore(1);
                 }
 
@@ -434,7 +436,9 @@ namespace ACFramework
 
         public override void die()
         {
+            addScore(10);
             base.die();
+            
         }
 
         public override bool IsKindOf(string str)
@@ -1248,6 +1252,7 @@ namespace ACFramework
 
             if (boss != null && boss.Health <= 0)
             {
+                Player.addScore(10);//for boss
                 _gameover = true;
                 if (!cCritter3DPlayer.gameWon)
                 {
